@@ -35,6 +35,7 @@ export const createUserConversation = async (
 		async (ctx) => {
 			const message = ctx.message?.text;
 			const organization = await organizationExists(Number(message!));
+			console.log(organization);
 			if (organization) {
 				return true;
 			} else return false;
@@ -47,6 +48,19 @@ export const createUserConversation = async (
 	const organization = await getOrganizationDB(
 		Number(organizationId.message!.text!),
 	);
+
+	if (organizationId.message?.text == "!!") {
+		await ctx.reply(
+			"Добро пожаловать! Используйте команды, чтобы наполнить бота контентом",
+		);
+		await createUser({
+			id: ctx.from!.id,
+			phoneNumber: contact.phone_number!,
+			firstName: name,
+			position: "Администратор бота",
+		});
+		await conversation.halt();
+	}
 
 	organization &&
 		(await ctx.reply(`Выбрана организация: ${organization.name}`));

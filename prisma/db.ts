@@ -335,7 +335,7 @@ export async function sendNextInfoBlock(userId: number) {
 	// Обновляем текущий вопрос (начинаем с первого вопроса инфоблока)
 	await prisma.user.update({
 		where: { id: userId },
-		data: { currentQuestionId: null },
+		data: { currentQuestionId: null, currentInfoBlockOrder: { increment: 1 } },
 	});
 }
 
@@ -510,10 +510,13 @@ export const getOrganizationDB = async (id: number) => {
 };
 
 export const organizationExists = async (id: number) => {
-	try {
-		await prisma.organization.findUnique({ where: { id } });
-		return true;
-	} catch (error) {
-		return false;
-	}
+	const result = await prisma.organization.findUnique({ where: { id } });
+	return result;
+};
+
+export const clearInfoInUser = async (id: number) => {
+	const user = await prisma.user.update({
+		where: { id },
+		data: { currentInfoBlockOrder: 1, infoBlockResendCount: 0 },
+	});
 };

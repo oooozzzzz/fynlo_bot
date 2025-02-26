@@ -15,6 +15,7 @@ import { updateQuestion } from "./conversations/updateQuestion";
 import { createInfo } from "./conversations/createInfo";
 import { addQuestionConversation } from "./conversations/addQuestionToInfo";
 import {
+	clearInfoInUser,
 	createUser,
 	deleteUser,
 	sendNextInfoBlock,
@@ -54,8 +55,9 @@ bot.api.setMyCommands([
 		command: "start",
 		description: "Начать работу с ботом/создать пользователя",
 	},
-	{ command: "delete", description: "Удалить пользователя" },
 	{ command: "question", description: "Создать вопрос" },
+	{ command: "delete", description: "Удалить пользователя" },
+	{ command: "clear_history", description: "Очистить историю ответов" },
 	// { command: "questions", description: "Вывести все вопросы" },
 	{ command: "add_info", description: "Добавить инфоблок" },
 	{ command: "show_info", description: "Показать инфоблоки" },
@@ -108,6 +110,10 @@ bot.command(
 	"question",
 	async (ctx) => await ctx.conversation.enter("createQuestion"),
 );
+bot.command("clear_history", async (ctx) => {
+	await clearInfoInUser(ctx.chat.id);
+	await ctx.reply("История очищена");
+});
 bot.command("questions", async (ctx) => await sendQuestions(ctx));
 
 bot.on("message", (ctx: Context) => ctx.reply("Got another message!"));
