@@ -55,7 +55,7 @@ bot.api.setMyCommands([
 		command: "start",
 		description: "Начать работу с ботом/создать пользователя",
 	},
-	{ command: "question", description: "Создать вопрос" },
+	// { command: "question", description: "Создать вопрос" },
 	{ command: "delete", description: "Удалить пользователя" },
 	{ command: "clear_history", description: "Очистить историю ответов" },
 	// { command: "questions", description: "Вывести все вопросы" },
