@@ -93,6 +93,9 @@ bot.command("delete", async (ctx) => {
 	await deleteUser(ctx.from!.id);
 });
 bot.command("next_info", async (ctx) => {
+	await ctx.reply(
+		"Следующий инфоблок: \n\nЕсли ничего нет, значит инфоблоки кончились",
+	);
 	await sendNextInfoBlock(ctx.chat!.id);
 	// await sendNextQuestion(ctx.chat!.id);
 });
