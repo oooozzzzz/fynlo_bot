@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      Int                @id
+  firstName               String?            @map("first_name")
+  phoneNumber             String?            @map("phone_number")
+  position                String?
+  stage                   Int                @default(1)
+  questions               Question[]
+  answers                 Answer[]
+  infoBlocks              InfoBlock[]
+  organization            Organization?      @relation(fields: [organizationId], references: [id])
+  organizationId          Int?
+  answerHistory           AnswerHistory[]
+  lastSentInfoBlockId     Int? // ID инфоблока, который был отправлен последним
+  consecutiveWrongAnswers Int                @default(0) // Новое поле для отслеживания неправильных ответов подряд
+  infoBlockHistory        InfoBlockHistory[]
+  infoBlockResendCount    Int                @default(0) // Количество повторных отправок инфоблока
+  currentInfoBlockOrder   Int                @default(1) // Порядковый номер текущего инфоблока
+  currentQuestionId       Int? // ID текущего вопроса
+  questionHistory         QuestionHistory[]
+}
+
+model Question {
+  id              Int               @id @default(autoincrement())
+  order           Int
+  text            String
+  respondents     User[]
+  answers         Answer[]
+  photo           String?
+  infoBlockId     Int?
+  InfoBlock       InfoBlock?        @relation(fields: [infoBlockId], references: [id], onDelete: Cascade)
+  AnswerHistory   AnswerHistory[]
+  QuestionHistory QuestionHistory[]
+}
+
+model Answer {
+  id            Int             @id @default(autoincrement())
+  question      Question?       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId    Int?            @map("question_id")
+  text          String
+  isCorrect     Boolean         @map("is_correct")
+  User          User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int?
+  recievedAt    DateTime?
+  AnswerHistory AnswerHistory[]
+}
+
+model InfoBlock {
+  id               Int                @id @default(autoincrement())
+  text             String
+  order            Int                @unique
+  photo            String?
+  users            User[]
+  questions        Question[]
+  InfoBlockHistory InfoBlockHistory[]
+
+  @@map("info_block")
+}
+
+model Organization {
+  id       Int    @id
+  name     String
+  category String
+  users    User[]
+}
+
+model AnswerHistory {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerId   Int
+  answer     Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean
+  answeredAt DateTime @default(now())
+
+  @@index([userId]) // Индекс для userId
+  @@index([questionId]) // Индекс для questionId
+  @@index([answeredAt]) // Индекс для answeredAt
+}
+
+model InfoBlockHistory {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  infoBlockId Int
+  infoBlock   InfoBlock @relation(fields: [infoBlockId], references: [id], onDelete: Cascade)
+  sentAt      DateTime  @default(now())
+  isResent    Boolean   @default(false) // Была ли отправка повторной
+}
+
+model QuestionHistory {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  sentAt     DateTime @default(now())
+}
