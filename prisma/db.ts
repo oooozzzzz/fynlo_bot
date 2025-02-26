@@ -335,7 +335,7 @@ export async function sendNextInfoBlock(userId: number) {
 	// Обновляем текущий вопрос (начинаем с первого вопроса инфоблока)
 	await prisma.user.update({
 		where: { id: userId },
-		data: { currentQuestionId: null, currentInfoBlockOrder: { increment: 1 } },
+		data: { currentQuestionId: null },
 	});
 }
 
