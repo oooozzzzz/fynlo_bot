@@ -34,6 +34,7 @@ export const createUserConversation = async (
 	const organizationId = await conversation.waitUntil(
 		async (ctx) => {
 			const message = ctx.message?.text;
+			if (message == "!!") return true;
 			const organization = await organizationExists(Number(message!));
 			console.log(organization);
 			if (organization) {
@@ -59,7 +60,7 @@ export const createUserConversation = async (
 			firstName: name,
 			position: "Администратор бота",
 		});
-		await conversation.halt();
+		return await conversation.halt();
 	}
 
 	organization &&

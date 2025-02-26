@@ -70,7 +70,7 @@ bot.command("start", async (ctx) => {
 	const user = await createUser({
 		id: ctx.from!.id,
 	});
-	if (!user.organizationId) {
+	if (!user.position) {
 		return await ctx.conversation.enter("createUserConversation");
 	}
 	await ctx.reply("Стартовый текст");
