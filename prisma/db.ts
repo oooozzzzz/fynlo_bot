@@ -54,6 +54,12 @@ export const deleteUser = async (id: number) => {
 	}
 };
 
+export const getUser = async (id: number) =>
+	await prisma.user.findUnique({
+		where: { id },
+		include: { organization: true },
+	});
+
 export const getQuestionsDB = async () =>
 	await prisma.question.findMany({
 		orderBy: { order: "asc" },
@@ -505,7 +511,10 @@ export const createOrganizationDB = async (
 
 export const getOrganizationDB = async (id: number) => {
 	try {
-		return await prisma.organization.findUnique({ where: { id } });
+		return await prisma.organization.findUnique({
+			where: { id },
+			include: { users: { select: { _count: true } } },
+		});
 	} catch (error) {}
 };
 
@@ -518,5 +527,24 @@ export const clearInfoInUser = async (id: number) => {
 	const user = await prisma.user.update({
 		where: { id },
 		data: { currentInfoBlockOrder: 1, infoBlockResendCount: 0 },
+	});
+};
+
+export const getPassword = async (id: string) => {
+	return await prisma.password.findUnique({ where: { id } });
+};
+
+export const setPassword = async (id: string, value: string) => {
+	return await prisma.password.update({ where: { id }, data: { value } });
+};
+
+export const getUsersCount = async () => {
+	return await prisma.user.count();
+};
+
+export const getUsersByCategory = async (category: string) => {
+	return await prisma.user.findMany({
+		where: { organization: { category } },
+		select: { id: true },
 	});
 };

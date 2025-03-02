@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
+  createdAt               DateTime           @default(now())
   id                      Int                @id
   firstName               String?            @map("first_name")
   phoneNumber             String?            @map("phone_number")
@@ -105,4 +106,9 @@ model QuestionHistory {
   questionId Int
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   sentAt     DateTime @default(now())
+}
+
+model Password {
+  id    String @id
+  value String
 }

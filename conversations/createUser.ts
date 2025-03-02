@@ -1,7 +1,6 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context, Keyboard } from "grammy";
 import { checkForCancel, delay } from "../serviceFunctions";
-import { toMainMenu } from "../routes/toMenus";
 import { get } from "http";
 import {
 	createUser,
@@ -9,23 +8,27 @@ import {
 	organizationExists,
 	sendNextInfoBlock,
 } from "../prisma/db";
+import { MyConversation, MyConversationContext } from "../bot";
 
 export const createUserConversation = async (
-	conversation: Conversation,
-	ctx: Context,
+	conversation: MyConversation,
+	ctx: MyConversationContext,
 ) => {
 	await ctx.reply("Как к Вам обращаться?");
 	const name = await conversation.form.text({
 		otherwise: (ctx) => ctx.reply("Пожалуйста, напишите имя"),
 	});
-	await ctx.reply("Введите номер телефона", {
-		reply_markup: new Keyboard()
-			.requestContact("Отправить номер телефона")
-			.resized(true)
-			.oneTime(true),
-	});
+	await ctx.reply(
+		ctx.emoji`Пожалуйста, отправьте свой номер телефона с помощью кнопки ниже ${"down_arrow"}`,
+		{
+			reply_markup: new Keyboard()
+				.requestContact("Отправить номер телефона")
+				.resized(true)
+				.oneTime(true),
+		},
+	);
 	const contact = await conversation.form.contact({
-		otherwise: (ctx) => ctx.reply("Пожалуйста, напишите номер телефона"),
+		otherwise: (ctx) => ctx.reply("Пожалуйста, воспользуйтесь кнопкой внизу"),
 	});
 	await ctx.reply("Введите уникальный код организации", {
 		reply_markup: { remove_keyboard: true },

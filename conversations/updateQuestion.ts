@@ -1,7 +1,7 @@
 import { Conversation } from "@grammyjs/conversations";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
 import { checkForCancel, sendQuestions } from "../serviceFunctions";
-import { toMainMenu } from "../routes/toMenus";
+import { toAdminMenu } from "../routes/toMenus";
 import {
 	addPhotoToQuestion,
 	addQuestionToInfo,
@@ -9,10 +9,11 @@ import {
 	updateQuestionOrder,
 } from "../prisma/db";
 import { Context } from "grammy";
+import { MyConversation, MyConversationContext } from "../bot";
 
 export const updateQuestion = async (
-	conversation: Conversation,
-	ctx: Context,
+	conversation: MyConversation,
+	ctx: MyConversationContext,
 	update: string,
 	questionId: number,
 ) => {
@@ -25,7 +26,7 @@ export const updateQuestion = async (
 				checkForCancel(
 					ctx,
 					conversation,
-					toMainMenu,
+					toAdminMenu,
 					"Порядковый номер вопроса должен быть числом",
 				),
 		});
@@ -44,7 +45,7 @@ export const updateQuestion = async (
 				checkForCancel(
 					ctx,
 					conversation,
-					toMainMenu,
+					toAdminMenu,
 					"Пожалуйста, отправьте фото",
 				),
 		});
@@ -62,7 +63,7 @@ export const updateQuestion = async (
 				checkForCancel(
 					ctx,
 					conversation,
-					toMainMenu,
+					toAdminMenu,
 					"Номер информационного блока должен быть числом",
 				),
 		});

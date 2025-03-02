@@ -1,14 +1,14 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toMainMenu } from "../routes/toMenus";
+import { toAdminMenu } from "../routes/toMenus";
 import { checkForCancel, generateRandomDigits } from "../serviceFunctions";
 import { createOrganizationDB } from "../prisma/db";
 import { startMenu } from "../interactive_menus/startMenu";
-import { api } from "../bot";
+import { api, MyConversation } from "../bot";
 
 export const createOrganization = async (
-	conversation: Conversation,
+	conversation: MyConversation,
 	ctx: Context,
 ) => {
 	await ctx.reply("Введите название организации", {
@@ -16,7 +16,7 @@ export const createOrganization = async (
 	});
 
 	const name = await conversation.form.text({
-		otherwise: (ctx) => checkForCancel(ctx, conversation, toMainMenu),
+		otherwise: (ctx) => checkForCancel(ctx, conversation, toAdminMenu),
 	});
 
 	await ctx.reply("Укажите нишу организации", {
@@ -36,7 +36,7 @@ export const createOrganization = async (
 	console.log(category);
 	if (category === "cancel") {
 		await conversation.halt();
-		await toMainMenu(ctx);
+		await toAdminMenu(ctx);
 		return;
 	}
 	const id = Number(generateRandomDigits());

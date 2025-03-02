@@ -1,7 +1,7 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toMainMenu } from "../routes/toMenus";
+import { toAdminMenu } from "../routes/toMenus";
 import {
 	checkForCancel,
 	isCommaSeparatedWords,
@@ -13,14 +13,18 @@ import {
 	getQuestionsCount,
 } from "../prisma/db";
 import { infoBlockMenu } from "../inline_keyboards/infoBlockMenu";
+import { MyConversation } from "../bot";
 
-export const createInfo = async (conversation: Conversation, ctx: Context) => {
+export const createInfo = async (
+	conversation: MyConversation,
+	ctx: Context,
+) => {
 	await ctx.reply("Введите текст информационного блока", {
 		reply_markup: cancelKeyboard("Отмена"),
 	});
 
 	const text = await conversation.form.text({
-		otherwise: (ctx) => checkForCancel(ctx, conversation, toMainMenu),
+		otherwise: (ctx) => checkForCancel(ctx, conversation, toAdminMenu),
 	});
 	await ctx.reply("Укажите порядок информационного блока", {
 		reply_markup: cancelKeyboard("Отмена"),
@@ -31,7 +35,7 @@ export const createInfo = async (conversation: Conversation, ctx: Context) => {
 			checkForCancel(
 				ctx,
 				conversation,
-				toMainMenu,
+				toAdminMenu,
 				"Порядковый номер информационного блока должен быть числом",
 			),
 	});

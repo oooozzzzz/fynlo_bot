@@ -5,14 +5,14 @@ import { getInfoById, getQuestionsDB, gettAllInfo } from "./prisma/db";
 import { questionKeyboard } from "./inline_keyboards/questionsKeyboard";
 import { Prisma } from "@prisma/client";
 import { infoBlockMenu } from "./inline_keyboards/infoBlockMenu";
-import { api } from "./bot";
+import { api, MyConversation } from "./bot";
 
 export const delay = async (ms: number) =>
 	new Promise((res) => setTimeout(res, ms));
 
 export const checkForCancel = async (
 	ctx: Context,
-	conversation: Conversation,
+	conversation: MyConversation,
 	route: Function,
 	message?: string,
 ) => {

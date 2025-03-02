@@ -1,25 +1,25 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toMainMenu } from "../routes/toMenus";
+import { toAdminMenu } from "../routes/toMenus";
 import {
 	checkForCancel,
 	isCommaSeparatedWords,
-	sendQuestions,
 	splitCommaSeparatedString,
 } from "../serviceFunctions";
 import { createQuestionsDB, getQuestionsCount } from "../prisma/db";
+import { MyConversation, MyConversationContext } from "../bot";
 
 export const createQuestion = async (
-	conversation: Conversation,
-	ctx: Context,
+	conversation: MyConversation,
+	ctx: MyConversationContext,
 ) => {
 	await ctx.reply("Введите текст вопроса:", {
 		reply_markup: cancelKeyboard("Отмена"),
 	});
 
 	const text = await conversation.form.text({
-		otherwise: (ctx) => checkForCancel(ctx, conversation, toMainMenu),
+		otherwise: (ctx) => checkForCancel(ctx, conversation, toAdminMenu),
 	});
 	await ctx.reply(
 		"Введите варианты ответа на вопрос через запятую. Верный ответ должен быть первым:",
@@ -34,7 +34,7 @@ export const createQuestion = async (
 				checkForCancel(
 					ctx,
 					conversation,
-					toMainMenu,
+					toAdminMenu,
 					"Пожалуйста, введите несколько вариантов ответа через запятую",
 				),
 		},
