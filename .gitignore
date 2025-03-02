@@ -3,4 +3,4 @@ node_modules
 .env
 prisma/dev.db
 build
-credentials.json
+/credentials.json
