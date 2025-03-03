@@ -7,6 +7,7 @@ import {
 	ReplyKeyboardMarkup,
 	ReplyKeyboardRemove,
 } from "grammy/types";
+import { InlineKeyboard } from "grammy";
 
 export const prisma = new PrismaClient();
 
@@ -347,7 +348,10 @@ async function sendInfoBlockToUser(
 	});
 }
 
-export async function sendNextInfoBlock(userId: number) {
+export async function sendNextInfoBlock(
+	userId: number,
+	inlineKeyboard?: InlineKeyboardMarkup,
+) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
 
@@ -362,7 +366,7 @@ export async function sendNextInfoBlock(userId: number) {
 	}
 
 	// Отправляем инфоблок пользователю
-	await sendInfoBlockToUser(userId, infoBlock);
+	await sendInfoBlockToUser(userId, infoBlock, inlineKeyboard);
 
 	// Обновляем текущий вопрос (начинаем с первого вопроса инфоблока)
 	await prisma.user.update({
@@ -439,6 +443,10 @@ export async function sendNextQuestion(userId: number) {
 			userId,
 			"Все вопросы завершены. Переходим к следующему инфоблоку.",
 		);
+		await sendNextInfoBlock(
+			userId,
+			new InlineKeyboard().text("Я все понял(а)!", "nextQuestion"),
+		);
 		return;
 	}
 
@@ -513,7 +521,11 @@ export async function handleAnswerDB(
 					userId,
 					"Текст после двух неправильных ответов подряд",
 				);
-				await sendInfoBlockToUser(userId, infoBlock);
+				await sendInfoBlockToUser(
+					userId,
+					infoBlock,
+					new InlineKeyboard().text("Попробовать еще раз", "nextQuestion"),
+				);
 
 				// Шаг 6: Обновляем счетчики
 				await prisma.user.update({

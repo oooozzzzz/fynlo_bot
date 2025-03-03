@@ -1,4 +1,11 @@
-import { Api, Bot, session, SessionFlavor, type Context } from "grammy";
+import {
+	Api,
+	Bot,
+	InlineKeyboard,
+	session,
+	SessionFlavor,
+	type Context,
+} from "grammy";
 import "dotenv/config";
 import { startMenu } from "./interactive_menus/startMenu";
 import { hydrate, HydrateFlavor } from "@grammyjs/hydrate";
@@ -114,9 +121,6 @@ bot.command("show_info", async (ctx) => {
 	await sendInfo(ctx);
 });
 bot.command("next_question", async (ctx) => {
-	await ctx.reply(
-		"Следующий вопрос: \n\nЕсли ничего нет, значит вопросы кончились",
-	);
 	await sendNextQuestion(ctx.chat!.id);
 });
 bot.command("delete", async (ctx) => {
@@ -138,6 +142,10 @@ bot.command("next_info", async (ctx) => {
 bot.callbackQuery("adminMenu", async (ctx) => {
 	ctx.msg?.delete();
 	await ctx.reply("Панель администратора", { reply_markup: adminMenu });
+});
+bot.callbackQuery("nextQuestion", async (ctx) => {
+	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Я все понял(а)!", "!"));
+	await sendNextQuestion(ctx.chat!.id);
 });
 
 bot.on("callback_query:data", async (ctx) => {

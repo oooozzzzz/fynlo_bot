@@ -1,5 +1,5 @@
 import { Conversation } from "@grammyjs/conversations";
-import { Context, Keyboard } from "grammy";
+import { Context, InlineKeyboard, Keyboard } from "grammy";
 import { checkForCancel, delay } from "../serviceFunctions";
 import { get } from "http";
 import {
@@ -83,6 +83,9 @@ export const createUserConversation = async (
 			"Супер, спасибо! В течение 14 дней будем направлять вам информацию. \n\nА сейчас - первый вводный блок",
 		);
 		await delay(3500);
-		sendNextInfoBlock(user.id);
+		sendNextInfoBlock(
+			user.id,
+			new InlineKeyboard().text("Я все понял(а)!", "nextQuestion"),
+		);
 	}
 };
