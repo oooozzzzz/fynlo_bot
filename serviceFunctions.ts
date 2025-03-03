@@ -249,14 +249,11 @@ export function calculateDuration(
 
 export function escapeMarkdownV2(text: string): string {
 	const escapeCharacters: { [key: string]: string } = {
-		"*": "\\*",
-		_: "\\_",
 		"[": "\\[",
 		"]": "\\]",
 		"(": "\\(",
 		")": "\\)",
 		"~": "\\~",
-		"`": "\\`",
 		">": "\\>",
 		"#": "\\#",
 		"+": "\\+",
