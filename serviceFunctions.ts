@@ -267,7 +267,7 @@ export function escapeMarkdownV2(text: string): string {
 	};
 
 	return text.replace(
-		/[*_`\[\]()~#+=\|!{}.]/g,
+		/[\[\]()~#+=\|!{}.]/g,
 		(match: string) => escapeCharacters[match],
 	);
 }
