@@ -156,7 +156,7 @@ export const deleteQuestion = async (itemId: number) => {
 		});
 
 		if (!itemToDelete) {
-			throw new Error("Item not found");
+			return;
 		}
 
 		const orderToDelete = itemToDelete.order;

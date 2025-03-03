@@ -2,10 +2,15 @@ import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
 import { toAdminMenu } from "../routes/toMenus";
-import { checkForCancel, generateRandomDigits } from "../serviceFunctions";
+import {
+	checkForCancel,
+	escapeMarkdownV2,
+	generateRandomDigits,
+} from "../serviceFunctions";
 import { createOrganizationDB } from "../prisma/db";
 import { startMenu } from "../interactive_menus/startMenu";
-import { api, MyConversation } from "../bot";
+import { api, MyContext, MyConversation } from "../bot";
+import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard";
 
 export const createOrganization = async (
 	conversation: MyConversation,
@@ -46,6 +51,14 @@ export const createOrganization = async (
 		id,
 	});
 	if (!organization) return await ctx.reply("Произошла ошибка");
-	await ctx.reply(`Организация ${organization.name} успешно создана
-ID организации: ${organization.id}`);
+	await ctx.reply(
+		escapeMarkdownV2(
+			`Организация *${organization.name}* успешно создана
+ID организации: \`${organization.id}\``,
+		),
+		{
+			parse_mode: "MarkdownV2",
+			reply_markup: toAdminMenuKeyboard("В панель администратора"),
+		},
+	);
 };
