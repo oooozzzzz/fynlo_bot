@@ -93,7 +93,7 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 		const orgs = organizations
 			.map(
 				(org) =>
-					`*${org.name}* \\(участников: ${org._count.users}\\) – _${org.category}_, ID: \`${org.id}\``,
+					`*${org.name}* (участников: ${org._count.users}) – _${org.category}_, ID: \`${org.id}\``,
 			)
 			.join("\n");
 		ctx.replyWithMarkdownV2(escapeMarkdownV2(orgs));
