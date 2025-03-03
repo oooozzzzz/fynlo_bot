@@ -552,6 +552,12 @@ export const createOrganizationDB = async (
 	} catch (error) {}
 };
 
+export const deleteOrganizationDB = async (id: number) => {
+	try {
+		return await prisma.organization.delete({ where: { id } });
+	} catch (error) {}
+};
+
 export const getOrganizationDB = async (id: number) => {
 	try {
 		return await prisma.organization.findUnique({

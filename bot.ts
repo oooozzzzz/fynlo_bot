@@ -26,6 +26,7 @@ import { addQuestionConversation } from "./conversations/addQuestionToInfo";
 import {
 	clearInfoInUser,
 	createUser,
+	deleteOrganizationDB,
 	deleteUser,
 	getPassword,
 	getUser,
@@ -156,6 +157,11 @@ bot.command(
 	"question",
 	async (ctx) => await ctx.conversation.enter("createQuestion"),
 );
+bot.command("rm_org", async (ctx) => {
+	if (!ctx.match) return;
+	const res = await deleteOrganizationDB(Number(ctx.match));
+	res ? await ctx.reply("Организация удалена") : await ctx.reply("Ошибка");
+});
 bot.command("clear_history", async (ctx) => {
 	await clearInfoInUser(ctx.chat.id);
 	await ctx.reply("История очищена");

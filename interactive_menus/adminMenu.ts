@@ -97,7 +97,6 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 			)
 			.join("\n");
 		ctx.replyWithMarkdownV2(escapeMarkdownV2(orgs));
-		console.log(escapeMarkdownV2(orgs));
 
 		await ctx.msg?.delete();
 		await ctx.reply("Панель администратора", { reply_markup: contentMenu });
