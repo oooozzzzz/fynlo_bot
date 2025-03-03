@@ -2,6 +2,12 @@ import { Conversation } from "@grammyjs/conversations";
 import { MyContext, MyConversation, MyConversationContext } from "../bot";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
 import { Context, InlineKeyboard } from "grammy";
+import {
+	calculateDuration,
+	delay,
+	processArrayAsync,
+} from "../serviceFunctions";
+import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard";
 
 export const sendOutConversation = async (
 	conversation: MyConversation,
@@ -13,7 +19,12 @@ export const sendOutConversation = async (
 		reply_markup: cancelKeyboard("Отмена"),
 	});
 	const message = await conversation.wait();
-	if (message.update.callback_query?.data == "cancel") conversation.halt();
+	if (message.update.callback_query?.data == "cancel") {
+		await ctx.reply("Рассылка отменена", {
+			reply_markup: toAdminMenuKeyboard("В панель администратора"),
+		});
+		return conversation.halt();
+	}
 	const menu = new InlineKeyboard()
 		.text("Отправить", "send")
 		.row()
@@ -31,6 +42,24 @@ export const sendOutConversation = async (
 	if (update.callbackQuery?.data == "send") {
 		// sending message to recievers
 		update.answerCallbackQuery();
-		ctx.reply("Рассылка началась");
+		const duration = calculateDuration(150, recievers.length);
+		await ctx.reply(`Рассылка началась. Это займет примерно ${duration}`);
+		const result = await processArrayAsync(
+			recievers,
+			async (reciever: number) => {
+				await ctx.api.copyMessage(
+					reciever,
+					ctx.from!.id,
+					copiedMessage.message_id,
+				);
+				await delay(150);
+			},
+		);
+		await ctx.reply(
+			`Рассылка завершена. Доставлено ${
+				result.filter((r) => r.status == "success").length
+			} сообщений`,
+			{ reply_markup: toAdminMenuKeyboard("В панель администратора") },
+		);
 	}
 };

@@ -1,7 +1,13 @@
 import { Menu, MenuRange } from "@grammyjs/menu";
 import { MyContext } from "../bot";
 import { Context } from "grammy";
-import { getUsersByCategory, getUsersCount } from "../prisma/db";
+import {
+	getAllOrganizations,
+	getAllUsers,
+	getOrganizationDB,
+	getUsersByCategory,
+	getUsersCount,
+} from "../prisma/db";
 import { sendInfo } from "../serviceFunctions";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
@@ -29,7 +35,11 @@ export const adminMenu = new Menu<MyContext>("adminMenu")
 const sendOutMenu = new Menu<MyContext>("sendOutMenu")
 	.text(
 		async () => `Отправить всем (${await getUsersCount()})`,
-		async (ctx) => {},
+		async (ctx) => {
+			const users = await getAllUsers();
+			const userIds = users.map((user) => user.id);
+			await ctx.conversation.enter("sendOutConversation", userIds);
+		},
 	)
 	.row()
 	.text("Отправить нише", async (ctx) => {
@@ -75,7 +85,20 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 	})
 	.row()
 	.text("Добавить организацию", async (ctx) => {
-		ctx.conversation.enter("createOrganization");
+		await ctx.conversation.enter("createOrganization");
+	})
+	.row()
+	.text("Показать организации", async (ctx) => {
+		const organizations = await getAllOrganizations();
+		const orgs = organizations
+			.map(
+				(org) =>
+					`*${org.name}* \\(участников: ${org._count.users}\\) – _${org.category}_, ID: \`${org.id}\``,
+			)
+			.join("\n");
+		ctx.replyWithMarkdownV2(orgs);
+		await ctx.msg?.delete();
+		await ctx.reply("Панель администратора", { reply_markup: contentMenu });
 	})
 	.row()
 	.text("Назад", async (ctx) => {

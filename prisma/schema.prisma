@@ -59,6 +59,7 @@ model InfoBlock {
   text             String
   order            Int                @unique
   photo            String?
+  video            String?
   users            User[]
   questions        Question[]
   InfoBlockHistory InfoBlockHistory[]

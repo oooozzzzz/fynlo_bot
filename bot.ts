@@ -34,17 +34,21 @@ import { changePasswordConversation } from "./conversations/changePasswordConver
 import { toAdminMenu } from "./routes/toMenus";
 import { EmojiFlavor, emojiParser } from "@grammyjs/emoji";
 import { admin } from "googleapis/build/src/apis/admin";
+import { hydrateReply } from "@grammyjs/parse-mode";
+import type { ParseModeFlavor } from "@grammyjs/parse-mode";
 
 interface SessionData {}
 const token = process.env.BOT_TOKEN;
 export const api = new Api(token!);
 export type MyContext = Context &
+	ParseModeFlavor<Context> &
 	EmojiFlavor<Context> &
 	SessionFlavor<SessionData> &
 	HydrateFlavor<Context> &
 	ConversationFlavor<Context>;
 export type MyConversationContext = Context &
 	EmojiFlavor<Context> &
+	ParseModeFlavor<Context> &
 	SessionFlavor<SessionData> &
 	HydrateFlavor<Context>;
 
@@ -55,6 +59,8 @@ export const bot = new Bot<MyContext>(token!);
 bot.use(session({ initial }));
 bot.use(emojiParser());
 bot.use(hydrate());
+// @ts-ignore
+bot.use(hydrateReply);
 bot.use(
 	conversations<MyContext, MyConversationContext>({
 		plugins: [startMenu, emojiParser(), hydrate()],

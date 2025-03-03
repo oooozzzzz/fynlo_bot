@@ -157,6 +157,11 @@ export const sendInfoBlock = async (
 			caption: message,
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
 		});
+	} else if (infoBlock.video) {
+		await ctx.replyWithVideo(infoBlock.video, {
+			caption: message,
+			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
+		});
 	} else {
 		await ctx.reply(message, {
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
@@ -188,4 +193,56 @@ export function generateRandomDigits(length: number = 6): string {
 		result += Math.floor(Math.random() * 10); // Генерация случайной цифры от 0 до 9
 	}
 	return result;
+}
+
+interface ProcessResult<T> {
+	item: T;
+	status: "success" | "error";
+	result?: string; // Результат выполнения функции (если успех)
+	error?: string; // Сообщение об ошибке (если ошибка)
+}
+
+export async function processArrayAsync<T>(
+	array: T[],
+	someAsyncFunction: (item: T) => Promise<any>,
+): Promise<ProcessResult<T>[]> {
+	// Создаем массив промисов
+	const promises = array.map(async (item) => {
+		try {
+			const result = await someAsyncFunction(item); // Выполняем асинхронную функцию
+			return { item, status: "success" } as ProcessResult<T>; // Возвращаем информацию об успехе
+		} catch (error) {
+			return {
+				item,
+				status: "error",
+				error: (error as Error).message,
+			} as ProcessResult<T>; // Возвращаем информацию об ошибке
+		}
+	});
+
+	// Ждем завершения всех промисов
+	const results = await Promise.all(promises);
+	return results;
+}
+
+export function calculateDuration(
+	actionDurationMs: number,
+	actionCount: number,
+): string {
+	// Вычисляем общую продолжительность в миллисекундах
+	const totalDurationMs = actionDurationMs * actionCount;
+
+	// Переводим миллисекунды в секунды
+	const totalDurationSeconds = Math.floor(totalDurationMs / 1000);
+
+	// Если секунд меньше или равно 60, возвращаем результат в секундах
+	if (totalDurationSeconds <= 60) {
+		return `${totalDurationSeconds} сек`;
+	}
+
+	// Если секунд больше 60, переводим в минуты и секунды
+	const minutes = Math.floor(totalDurationSeconds / 60);
+	const seconds = totalDurationSeconds % 60;
+
+	return `${minutes} мин ${seconds} сек`;
 }

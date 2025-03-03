@@ -1,6 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { api } from "../bot";
 import { sendQuestion } from "../serviceFunctions";
+import {
+	ForceReply,
+	InlineKeyboardMarkup,
+	ReplyKeyboardMarkup,
+	ReplyKeyboardRemove,
+} from "grammy/types";
 
 export const prisma = new PrismaClient();
 
@@ -305,10 +311,30 @@ export const deleteInfoBlock = async (infoBlockId: number) => {
 async function sendInfoBlockToUser(
 	userId: number,
 	infoBlock: Prisma.InfoBlockGetPayload<{ include: { questions: false } }>,
+	inlineKeyboard?:
+		| InlineKeyboardMarkup
+		| ReplyKeyboardMarkup
+		| ReplyKeyboardRemove
+		| ForceReply
+		| undefined,
 ) {
 	// Логика отправки (например, через email, API или WebSocket)
-	console.log(`Пользователь ${userId} получает инфоблок повторно:`);
-	await api.sendMessage(userId, infoBlock.text);
+	console.log(`Пользователь ${userId} получает инфоблок`);
+	const { photo, video, text } = infoBlock;
+	if (photo)
+		await api.sendPhoto(userId, photo, {
+			caption: text,
+			reply_markup: inlineKeyboard,
+		});
+	if (video)
+		await api.sendVideo(userId, video, {
+			caption: text,
+			reply_markup: inlineKeyboard,
+		});
+	if (!photo && !video)
+		await api.sendMessage(userId, infoBlock.text, {
+			reply_markup: inlineKeyboard,
+		});
 
 	// Пример: сохраняем в истории отправок
 	await prisma.infoBlockHistory.create({
@@ -366,6 +392,7 @@ export async function sendQuestionToUser(
 export async function sendNextQuestion(userId: number) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
+	console.log(user);
 
 	// Находим текущий инфоблок
 	const infoBlock = await prisma.infoBlock.findFirst({
@@ -394,6 +421,7 @@ export async function sendNextQuestion(userId: number) {
 		// Если текущий вопрос не задан, начинаем с первого
 		currentQuestion = infoBlock.questions[0];
 	}
+	console.log(currentQuestion, "currentQuestion");
 
 	if (!currentQuestion) {
 		// Если вопросы закончились, переходим к следующему инфоблоку
@@ -407,10 +435,10 @@ export async function sendNextQuestion(userId: number) {
 
 		// Отправляем следующий инфоблок
 		// await sendDailyInfoBlock(userId);
-		// await api.sendMessage(
-		// 	userId,
-		// 	"Все вопросы завершены. Переходим к следующему инфоблоку.",
-		// );
+		await api.sendMessage(
+			userId,
+			"Все вопросы завершены. Переходим к следующему инфоблоку.",
+		);
 		return;
 	}
 
@@ -433,7 +461,6 @@ export async function handleAnswerDB(
 	// Шаг 1: Проверяем, прошел ли пользователь все инфоблоки
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
-	console.log(user);
 
 	const totalInfoBlocks = await prisma.infoBlock.count(); // Общее количество инфоблоков
 	if (user.currentInfoBlockOrder > totalInfoBlocks) {
@@ -448,6 +475,9 @@ export async function handleAnswerDB(
 
 	if (!answer || !answer.question) {
 		throw new Error("Ответ или вопрос не найден");
+	}
+	if (answer.question.order !== user.currentInfoBlockOrder) {
+		return;
 	}
 
 	// Шаг 2: Обновляем данные пользователя
@@ -490,6 +520,7 @@ export async function handleAnswerDB(
 					where: { id: userId },
 					data: {
 						consecutiveWrongAnswers: 0,
+						currentQuestionId: null,
 						lastSentInfoBlockId: infoBlock.id,
 						infoBlockResendCount: { increment: 1 }, // Увеличиваем счетчик повторов
 					},
@@ -547,4 +578,14 @@ export const getUsersByCategory = async (category: string) => {
 		where: { organization: { category } },
 		select: { id: true },
 	});
+};
+
+export const getAllOrganizations = async () => {
+	return await prisma.organization.findMany({
+		include: { _count: { select: { users: true } } },
+	});
+};
+
+export const getAllUsers = async () => {
+	return await prisma.user.findMany();
 };

@@ -40,28 +40,51 @@ export const createInfo = async (
 			),
 	});
 	await ctx.reply(
-		"Отправьте фото, которое будет прикреплено к информационному блоку",
+		"Отправьте фото или видео, которое будет прикреплено к информационному блоку",
 		{
 			reply_markup: cancelKeyboard("Пропустить"),
 		},
 	);
-	let photoId;
-	const photo = await conversation.waitUntil((ctx) => {
-		return (
-			Context.has.filterQuery(":photo")(ctx) || ctx.hasCallbackQuery("cancel")
-		);
-	});
-	if (photo.hasCallbackQuery("cancel")) {
-		photoId = null;
-		photo.answerCallbackQuery();
-	} else {
-		photoId = photo.message?.photo![0].file_id;
+	let photoId = null;
+	let videoId = null;
+
+	const media = await conversation.waitUntil(
+		(ctx) => {
+			return (
+				Context.has.filterQuery(":photo")(ctx) ||
+				ctx.hasCallbackQuery("cancel") ||
+				Context.has.filterQuery(":video")(ctx)
+			);
+		},
+		{
+			otherwise: (ctx) => {
+				ctx.reply("Отправьте фото либо видео или воспользуйтесь кнопкой");
+			},
+		},
+	);
+	if (media.hasCallbackQuery("cancel")) {
+		media.answerCallbackQuery();
+	} else if (media.message?.photo) {
+		photoId = media.message?.photo![0].file_id;
+	} else if (media.message?.video) {
+		videoId = media.message?.video.file_id;
 	}
-	const infoBlock = await createInfoDB({ text, order, photo: photoId });
+
+	const infoBlock = await createInfoDB({
+		text,
+		order,
+		photo: photoId,
+		video: videoId,
+	});
 	if (infoBlock) {
 		await ctx.reply("Информационный блок создан");
 		infoBlock.photo
 			? await ctx.replyWithPhoto(infoBlock.photo, {
+					caption: infoBlock.text,
+					reply_markup: infoBlockMenu(infoBlock),
+			  })
+			: infoBlock.video
+			? await ctx.replyWithVideo(infoBlock.video, {
 					caption: infoBlock.text,
 					reply_markup: infoBlockMenu(infoBlock),
 			  })
