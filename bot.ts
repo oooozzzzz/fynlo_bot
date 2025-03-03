@@ -120,7 +120,12 @@ bot.command("next_question", async (ctx) => {
 	await sendNextQuestion(ctx.chat!.id);
 });
 bot.command("delete", async (ctx) => {
-	await deleteUser(ctx.from!.id);
+	const result = await deleteUser(ctx.from!.id);
+	if (result) {
+		await ctx.reply("Пользователь удален");
+	} else {
+		await ctx.reply("Пользователь не найден");
+	}
 });
 bot.command("next_info", async (ctx) => {
 	await ctx.reply(
