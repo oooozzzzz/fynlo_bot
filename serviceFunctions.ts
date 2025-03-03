@@ -246,3 +246,31 @@ export function calculateDuration(
 
 	return `${minutes} мин ${seconds} сек`;
 }
+
+export function escapeMarkdownV2(text: string): string {
+	const escapeCharacters: { [key: string]: string } = {
+		"*": "\\*",
+		_: "\\_",
+		"[": "\\[",
+		"]": "\\]",
+		"(": "\\(",
+		")": "\\)",
+		"~": "\\~",
+		"`": "\\`",
+		">": "\\>",
+		"#": "\\#",
+		"+": "\\+",
+		"-": "\\-",
+		"=": "\\=",
+		"|": "\\|",
+		"!": "\\!",
+		"{": "\\{",
+		"}": "\\}",
+		".": "\\.",
+	};
+
+	return text.replace(
+		/[*_`\[\]()~#+=\|!{}.]/g,
+		(match: string) => escapeCharacters[match],
+	);
+}

@@ -8,7 +8,7 @@ import {
 	getUsersByCategory,
 	getUsersCount,
 } from "../prisma/db";
-import { sendInfo } from "../serviceFunctions";
+import { escapeMarkdownV2, sendInfo } from "../serviceFunctions";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
 	.url(
@@ -96,7 +96,8 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 					`*${org.name}* \\(участников: ${org._count.users}\\) – _${org.category}_, ID: \`${org.id}\``,
 			)
 			.join("\n");
-		ctx.replyWithMarkdownV2(orgs);
+		ctx.replyWithMarkdownV2(escapeMarkdownV2(orgs));
+
 		await ctx.msg?.delete();
 		await ctx.reply("Панель администратора", { reply_markup: contentMenu });
 	})
