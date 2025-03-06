@@ -13,7 +13,7 @@ import {
 	organizationsString,
 	sendInfo,
 } from "../serviceFunctions";
-import { reloadSheet } from "../sheets";
+import { reloadAllSheets, reloadSheet } from "../sheets";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
 	.text("Информация", async (ctx) => {
@@ -108,10 +108,7 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 
 export const infoMenu = new Menu<MyContext>("infoMenu")
 	.text("Обновить информацию", async (ctx) => {
-		const sheets = ["Пользователи", "Организации"];
-		for (const sheet of sheets) {
-			reloadSheet(sheet);
-		}
+		reloadAllSheets();
 	})
 	.row()
 	.url(

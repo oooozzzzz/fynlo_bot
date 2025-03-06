@@ -70,7 +70,7 @@ export const createSheet = async (sheet = "Пользователи") => {
 			const users = await getAllUsers();
 			data = users.map((user) => [
 				user.firstName,
-				"+" + user.phoneNumber?.toString(),
+				`${user.phoneNumber?.toString()}`,
 				user.organization?.name,
 				user.organization?.category,
 				user.position,
@@ -101,4 +101,11 @@ export const reloadSheet = async (sheet: string = "Пользователи") =>
 	await clearSheet(sheet);
 	await createSheet(sheet);
 	console.log("Sheet reloaded");
+};
+
+export const reloadAllSheets = async () => {
+	const sheets = ["Пользователи", "Организации"];
+	for (const sheet of sheets) {
+		await reloadSheet(sheet);
+	}
 };
