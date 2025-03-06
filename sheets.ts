@@ -70,7 +70,7 @@ export const createSheet = async (sheet = "Пользователи") => {
 			const users = await getAllUsers();
 			data = users.map((user) => [
 				user.firstName,
-				user.phoneNumber,
+				"+" + user.phoneNumber?.toString(),
 				user.organization?.name,
 				user.organization?.category,
 				user.position,
