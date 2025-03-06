@@ -108,7 +108,7 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 
 export const infoMenu = new Menu<MyContext>("infoMenu")
 	.text("Обновить информацию", async (ctx) => {
-		reloadAllSheets();
+		await reloadAllSheets();
 	})
 	.row()
 	.url(
