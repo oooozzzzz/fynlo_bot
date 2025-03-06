@@ -8,13 +8,17 @@ import {
 	getUsersByCategory,
 	getUsersCount,
 } from "../prisma/db";
-import { escapeMarkdownV2, sendInfo } from "../serviceFunctions";
+import {
+	escapeMarkdownV2,
+	organizationsString,
+	sendInfo,
+} from "../serviceFunctions";
+import { reloadSheet } from "../sheets";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
-	.url(
-		"Информация о пользователях",
-		"https://docs.google.com/spreadsheets/d/1PpeUNm7DkQYovXwmMvGsR-PbRmGtIcPYu2KoVkhwFis/edit?gid=0#gid=0",
-	)
+	.text("Информация", async (ctx) => {
+		ctx.menu.nav("infoMenu");
+	})
 	.row()
 	.text("Отправить рассылку", async (ctx) => {
 		ctx.menu.nav("sendOutMenu");
@@ -47,7 +51,9 @@ const sendOutMenu = new Menu<MyContext>("sendOutMenu")
 		await ctx.answerCallbackQuery("Выберите нишу");
 	})
 	.row()
-	.text("Отправить организации", async (ctx) => {})
+	.text("Отправить организации", async (ctx) => {
+		await ctx.conversation.enter("sendToOrganization");
+	})
 	.row()
 	.text("Назад", async (ctx) => {
 		ctx.menu.back();
@@ -89,14 +95,8 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 	})
 	.row()
 	.text("Показать организации", async (ctx) => {
-		const organizations = await getAllOrganizations();
-		const orgs = organizations
-			.map(
-				(org) =>
-					`*${org.name}* (участников: ${org._count.users}) – _${org.category}_, ID: \`${org.id}\``,
-			)
-			.join("\n");
-		ctx.replyWithMarkdownV2(escapeMarkdownV2(orgs));
+		const organizations = await organizationsString();
+		ctx.replyWithMarkdownV2(escapeMarkdownV2(organizations));
 
 		await ctx.msg?.delete();
 		await ctx.reply("Панель администратора", { reply_markup: contentMenu });
@@ -106,6 +106,22 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 		ctx.menu.back();
 	});
 
-adminMenu.register(sendOutMenu);
-adminMenu.register(contentMenu);
+export const infoMenu = new Menu<MyContext>("infoMenu")
+	.text("Обновить информацию", async (ctx) => {
+		const sheets = ["Пользователи", "Организации"];
+		for (const sheet of sheets) {
+			reloadSheet(sheet);
+		}
+	})
+	.row()
+	.url(
+		"Информация",
+		"https://docs.google.com/spreadsheets/d/1PpeUNm7DkQYovXwmMvGsR-PbRmGtIcPYu2KoVkhwFis/edit?gid=0#gid=0",
+	)
+	.row()
+	.text("Назад", async (ctx) => {
+		ctx.menu.back();
+	});
+
+adminMenu.register([sendOutMenu, infoMenu, contentMenu]);
 adminMenu.register(categoriesMenu, "sendOutMenu");

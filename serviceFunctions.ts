@@ -1,7 +1,12 @@
 import { Context } from "grammy";
 import { toMainMenu } from "./routes/toMenus";
 import { Conversation } from "@grammyjs/conversations";
-import { getInfoById, getQuestionsDB, gettAllInfo } from "./prisma/db";
+import {
+	getAllOrganizations,
+	getInfoById,
+	getQuestionsDB,
+	gettAllInfo,
+} from "./prisma/db";
 import { questionKeyboard } from "./inline_keyboards/questionsKeyboard";
 import { Prisma } from "@prisma/client";
 import { infoBlockMenu } from "./inline_keyboards/infoBlockMenu";
@@ -271,3 +276,14 @@ export function escapeMarkdownV2(text: string): string {
 		(match: string) => escapeCharacters[match],
 	);
 }
+
+export const organizationsString = async () => {
+	const organizations = await getAllOrganizations();
+	const orgs = organizations
+		.map(
+			(org) =>
+				`*${org.name}* (участников: ${org._count.users}) – _${org.category}_, ID: \`${org.id}\``,
+		)
+		.join("\n");
+	return orgs;
+};

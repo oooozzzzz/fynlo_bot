@@ -44,6 +44,7 @@ import { EmojiFlavor, emojiParser } from "@grammyjs/emoji";
 import { admin } from "googleapis/build/src/apis/admin";
 import { hydrateReply } from "@grammyjs/parse-mode";
 import type { ParseModeFlavor } from "@grammyjs/parse-mode";
+import { sendToOrganization } from "./conversations/sendToOrganization";
 
 interface SessionData {}
 const token = process.env.BOT_TOKEN;
@@ -71,10 +72,12 @@ bot.use(hydrate());
 bot.use(hydrateReply);
 bot.use(
 	conversations<MyContext, MyConversationContext>({
-		plugins: [startMenu, emojiParser(), hydrate()],
+		// @ts-ignore
+		plugins: [startMenu, emojiParser(), hydrate(), hydrateReply],
 	}),
 );
 bot.use(createConversation(introduce));
+bot.use(createConversation(sendToOrganization));
 bot.use(createConversation(changePasswordConversation));
 bot.use(createConversation(createQuestion));
 bot.use(createConversation(updateQuestion));

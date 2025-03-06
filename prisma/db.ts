@@ -562,7 +562,7 @@ export const getOrganizationDB = async (id: number) => {
 	try {
 		return await prisma.organization.findUnique({
 			where: { id },
-			include: { users: { select: { _count: true } } },
+			include: { users: { include: { _count: true } } },
 		});
 	} catch (error) {}
 };
@@ -605,5 +605,5 @@ export const getAllOrganizations = async () => {
 };
 
 export const getAllUsers = async () => {
-	return await prisma.user.findMany();
+	return await prisma.user.findMany({ include: { organization: true } });
 };
