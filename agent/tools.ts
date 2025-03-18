@@ -5,11 +5,8 @@ import { Document } from "@langchain/core/documents";
 
 export const findInfo = tool(
 	async ({ question }: { question: string }) => {
-		console.log(question);
 		const answer: Document[] = await retriever.invoke(question);
-		console.log(answer);
 		const result = answer.map((a) => a.pageContent).join("\n");
-		console.log(result);
 		return result;
 	},
 	{

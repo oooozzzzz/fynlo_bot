@@ -1,15 +1,15 @@
 import { Conversation } from "@grammyjs/conversations";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { checkForCancel, sendQuestions } from "../serviceFunctions";
-import { toAdminMenu } from "../routes/toMenus";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { checkForCancel, sendQuestions } from "../serviceFunctions.js";
+import { toAdminMenu } from "../routes/toMenus.js";
 import {
 	addPhotoToQuestion,
 	addQuestionToInfo,
 	getInfoByOrder,
 	updateQuestionOrder,
-} from "../prisma/db";
+} from "../prisma/db.js";
 import { Context } from "grammy";
-import { MyConversation, MyConversationContext } from "../bot";
+import { MyConversation, MyConversationContext } from "../bot.js";
 
 export const updateQuestion = async (
 	conversation: MyConversation,

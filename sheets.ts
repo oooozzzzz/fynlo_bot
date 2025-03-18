@@ -108,6 +108,6 @@ export const reloadSheet = async (sheet: string = "Пользователи") =>
 export const reloadAllSheets = async () => {
 	const sheets = ["Пользователи", "Организации"];
 	for (const sheet of sheets) {
-		await reloadSheet(sheet);
+		reloadSheet(sheet);
 	}
 };
