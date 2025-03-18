@@ -1,5 +1,5 @@
 import { Menu, MenuRange } from "@grammyjs/menu";
-import { MyContext } from "../bot";
+import { MyContext } from "../bot.js";
 import { Context } from "grammy";
 import {
 	getAllOrganizations,
@@ -7,13 +7,13 @@ import {
 	getOrganizationDB,
 	getUsersByCategory,
 	getUsersCount,
-} from "../prisma/db";
+} from "../prisma/db.js";
 import {
 	escapeMarkdownV2,
 	organizationsString,
 	sendInfo,
-} from "../serviceFunctions";
-import { reloadAllSheets, reloadSheet } from "../sheets";
+} from "../serviceFunctions.js";
+import { reloadAllSheets, reloadSheet } from "../sheets.js";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
 	.text("Информация", async (ctx) => {
@@ -108,7 +108,10 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 
 export const infoMenu = new Menu<MyContext>("infoMenu")
 	.text("Обновить информацию", async (ctx) => {
-		await reloadAllSheets();
+		ctx.reply(
+			"Информация начала обновляться. Это может занять некоторое время",
+		);
+		reloadAllSheets();
 	})
 	.row()
 	.url(

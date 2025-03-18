@@ -1,13 +1,13 @@
 import { Conversation } from "@grammyjs/conversations";
-import { MyContext, MyConversation, MyConversationContext } from "../bot";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
+import { MyContext, MyConversation, MyConversationContext } from "../bot.js";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
 import { Context, InlineKeyboard } from "grammy";
 import {
 	calculateDuration,
 	delay,
 	processArrayAsync,
-} from "../serviceFunctions";
-import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard";
+} from "../serviceFunctions.js";
+import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard.js";
 
 export const sendOutConversation = async (
 	conversation: MyConversation,

@@ -1,14 +1,14 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toAdminMenu } from "../routes/toMenus";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { toAdminMenu } from "../routes/toMenus.js";
 import {
 	checkForCancel,
 	isCommaSeparatedWords,
 	splitCommaSeparatedString,
-} from "../serviceFunctions";
-import { createQuestionsDB, getQuestionsCount } from "../prisma/db";
-import { MyConversation, MyConversationContext } from "../bot";
+} from "../serviceFunctions.js";
+import { createQuestionsDB, getQuestionsCount } from "../prisma/db.js";
+import { MyConversation, MyConversationContext } from "../bot.js";
 
 export const createQuestion = async (
 	conversation: MyConversation,

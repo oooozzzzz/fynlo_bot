@@ -1,9 +1,9 @@
 import { Context } from "grammy";
-import { deleteInfoBlock, deleteQuestion } from "../prisma/db";
-import { handleAnswer } from "./handleAsnwer";
-import { updateQuestion } from "../conversations/updateQuestion";
-import { MyContext } from "../bot";
-import { sendQuestions } from "../serviceFunctions";
+import { deleteInfoBlock, deleteQuestion } from "../prisma/db.js";
+import { handleAnswer } from "./handleAsnwer.js";
+import { updateQuestion } from "../conversations/updateQuestion.js";
+import { MyContext } from "../bot.js";
+import { sendQuestions } from "../serviceFunctions.js";
 
 export const callbackQueryHandler = async (ctx: MyContext) => {
 	const query = ctx.callbackQuery?.data!;
@@ -43,6 +43,10 @@ export const callbackQueryHandler = async (ctx: MyContext) => {
 			await deleteInfoBlock(parseInt(data[1]));
 			await ctx.deleteMessage();
 			await ctx.answerCallbackQuery("Информационный блок удален");
+			break;
+		case "question":
+			await ctx.conversation.enter("answerQuestion", parseInt(data[1]));
+			break;
 		default:
 			break;
 	}

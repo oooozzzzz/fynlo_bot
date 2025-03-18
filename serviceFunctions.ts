@@ -1,16 +1,16 @@
 import { Context } from "grammy";
-import { toMainMenu } from "./routes/toMenus";
+import { toMainMenu } from "./routes/toMenus.js";
 import { Conversation } from "@grammyjs/conversations";
 import {
 	getAllOrganizations,
 	getInfoById,
 	getQuestionsDB,
 	gettAllInfo,
-} from "./prisma/db";
-import { questionKeyboard } from "./inline_keyboards/questionsKeyboard";
+} from "./prisma/db.js";
+import { questionKeyboard } from "./inline_keyboards/questionsKeyboard.js";
 import { Prisma } from "@prisma/client";
-import { infoBlockMenu } from "./inline_keyboards/infoBlockMenu";
-import { api, MyConversation } from "./bot";
+import { infoBlockMenu } from "./inline_keyboards/infoBlockMenu.js";
+import { api, MyConversation } from "./bot.js";
 
 export const delay = async (ms: number) =>
 	new Promise((res) => setTimeout(res, ms));

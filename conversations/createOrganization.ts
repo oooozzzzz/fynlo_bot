@@ -1,16 +1,15 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard } from "grammy";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toAdminMenu } from "../routes/toMenus";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { toAdminMenu } from "../routes/toMenus.js";
 import {
 	checkForCancel,
 	escapeMarkdownV2,
 	generateRandomDigits,
-} from "../serviceFunctions";
-import { createOrganizationDB } from "../prisma/db";
-import { startMenu } from "../interactive_menus/startMenu";
-import { api, MyContext, MyConversation } from "../bot";
-import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard";
+} from "../serviceFunctions.js";
+import { createOrganizationDB } from "../prisma/db.js";
+import { api, MyContext, MyConversation } from "../bot.js";
+import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard.js";
 
 export const createOrganization = async (
 	conversation: MyConversation,

@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { api } from "../bot";
-import { sendQuestion } from "../serviceFunctions";
+import { api } from "../bot.js";
+import { sendQuestion } from "../serviceFunctions.js";
 import {
 	ForceReply,
 	InlineKeyboardMarkup,
@@ -425,7 +425,6 @@ export async function sendNextQuestion(userId: number) {
 		// Если текущий вопрос не задан, начинаем с первого
 		currentQuestion = infoBlock.questions[0];
 	}
-	console.log(currentQuestion, "currentQuestion");
 
 	if (!currentQuestion) {
 		// Если вопросы закончились, переходим к следующему инфоблоку
@@ -441,8 +440,11 @@ export async function sendNextQuestion(userId: number) {
 		// await sendDailyInfoBlock(userId);
 		await api.sendMessage(
 			userId,
-			"Все вопросы завершены. Переходим к следующему инфоблоку.",
+			"Отлично, так держать! Теперь переходим к новому блоку информации",
 		);
+		// if (process.env.NODE_ENV === "dev") {
+		// 	await api.sendMessage(userId, "Для наглядности ");
+		// }
 		await sendNextInfoBlock(
 			userId,
 			new InlineKeyboard().text("Я все понял(а)!", "nextQuestion"),
@@ -519,6 +521,7 @@ export async function handleAnswerDB(
 				// Шаг 5: Отправляем текущий инфоблок заново
 				await api.sendMessage(
 					userId,
+					// тексто после двух неправильных ответов подярд
 					"Текст после двух неправильных ответов подряд",
 				);
 				await sendInfoBlockToUser(

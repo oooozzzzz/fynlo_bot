@@ -1,19 +1,19 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { toAdminMenu } from "../routes/toMenus";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { toAdminMenu } from "../routes/toMenus.js";
 import {
 	checkForCancel,
 	isCommaSeparatedWords,
 	splitCommaSeparatedString,
-} from "../serviceFunctions";
+} from "../serviceFunctions.js";
 import {
 	createInfoDB,
 	createQuestionsDB,
 	getQuestionsCount,
-} from "../prisma/db";
-import { infoBlockMenu } from "../inline_keyboards/infoBlockMenu";
-import { MyConversation } from "../bot";
+} from "../prisma/db.js";
+import { infoBlockMenu } from "../inline_keyboards/infoBlockMenu.js";
+import { MyConversation } from "../bot.js";
 
 export const createInfo = async (
 	conversation: MyConversation,

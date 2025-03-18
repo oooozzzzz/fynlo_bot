@@ -1,13 +1,13 @@
-import { MyConversation, MyConversationContext } from "../bot";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { getOrganizationDB } from "../prisma/db";
-import { toAdminMenu } from "../routes/toMenus";
+import { MyConversation, MyConversationContext } from "../bot.js";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { getOrganizationDB } from "../prisma/db.js";
+import { toAdminMenu } from "../routes/toMenus.js";
 import {
 	checkForCancel,
 	escapeMarkdownV2,
 	organizationsString,
-} from "../serviceFunctions";
-import { sendOutConversation } from "./sendOutConversation";
+} from "../serviceFunctions.js";
+import { sendOutConversation } from "./sendOutConversation.js";
 
 export const sendToOrganization = async (
 	conversation: MyConversation,

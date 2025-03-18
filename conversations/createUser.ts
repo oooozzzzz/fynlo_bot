@@ -1,14 +1,14 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard, Keyboard } from "grammy";
-import { checkForCancel, delay } from "../serviceFunctions";
+import { checkForCancel, delay } from "../serviceFunctions.js";
 import { get } from "http";
 import {
 	createUser,
 	getOrganizationDB,
 	organizationExists,
 	sendNextInfoBlock,
-} from "../prisma/db";
-import { MyConversation, MyConversationContext } from "../bot";
+} from "../prisma/db.js";
+import { MyConversation, MyConversationContext } from "../bot.js";
 
 export const createUserConversation = async (
 	conversation: MyConversation,

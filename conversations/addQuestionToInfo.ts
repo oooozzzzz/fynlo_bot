@@ -1,7 +1,7 @@
 import { Conversation } from "@grammyjs/conversations";
-import { MyContext, MyConversation, MyConversationContext } from "../bot";
-import { createQuestion } from "./createQuestion";
-import { addQuestionToInfo } from "../prisma/db";
+import { MyContext, MyConversation, MyConversationContext } from "../bot.js";
+import { createQuestion } from "./createQuestion.js";
+import { addQuestionToInfo } from "../prisma/db.js";
 import { Context } from "grammy";
 
 export const addQuestionConversation = async (

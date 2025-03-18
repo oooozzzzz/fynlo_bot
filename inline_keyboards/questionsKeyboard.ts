@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { InlineKeyboard } from "grammy";
-import { shuffleArray } from "../serviceFunctions";
+import { shuffleArray } from "../serviceFunctions.js";
 
 export const questionKeyboard = (
 	question: Prisma.QuestionGetPayload<{ include: { answers: true } }>,

@@ -1,10 +1,10 @@
 import { Context, InlineKeyboard } from "grammy";
-import { MyContext, MyConversation } from "../bot";
-import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard";
-import { checkForCancel } from "../serviceFunctions";
-import { toAdminMenu, toMainMenu } from "../routes/toMenus";
-import { setPassword } from "../prisma/db";
-import { adminMenu } from "../interactive_menus/adminMenu";
+import { MyContext, MyConversation } from "../bot.js";
+import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
+import { checkForCancel } from "../serviceFunctions.js";
+import { toAdminMenu, toMainMenu } from "../routes/toMenus.js";
+import { setPassword } from "../prisma/db.js";
+import { adminMenu } from "../interactive_menus/adminMenu.js";
 
 export const changePasswordConversation = async (
 	conversation: MyConversation,
