@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { google } from "googleapis";
-import { getAllOrganizations, getAllUsers, getUser } from "./prisma/db";
-import { delay } from "./serviceFunctions";
+import { getAllOrganizations, getAllUsers, getUser } from "./prisma/db.js";
+import { delay } from "./serviceFunctions.js";
 
 const auth = new google.auth.GoogleAuth({
 	keyFile: "credentials.json",
@@ -39,11 +39,11 @@ export const addRowToSheet = async (row: any[], sheet: string) => {
 	});
 };
 
-export const isSheetEmpty = async () => {
+export const isSheetEmpty = async (sheet: string = "Пользователи") => {
 	const response = await sheets.spreadsheets.values.get({
 		auth,
 		spreadsheetId,
-		range: "Пользователи!A2:A3",
+		range: `${sheet}!A2:A3`,
 	});
 
 	const result = response.data.values;
@@ -55,11 +55,12 @@ export const isSheetEmpty = async () => {
 };
 
 export const clearSheet = async (sheet: string = "Пользователи") => {
-	while (!(await isSheetEmpty())) {
+	while (!(await isSheetEmpty(sheet))) {
 		await sheets.spreadsheets.values.clear({
 			spreadsheetId,
 			range: `${sheet}!A2:Z100`,
 		});
+		await delay(100);
 	}
 };
 
@@ -92,12 +93,13 @@ export const createSheet = async (sheet = "Пользователи") => {
 	}
 	for (let i = 0; i < data.length; i++) {
 		await addRowToSheet(data[i], sheet);
-		// await delay(150);
+		await delay(100);
+		console.log("Raw added");
 	}
-	// await addRowToSheet(data, sheet);
 };
 
 export const reloadSheet = async (sheet: string = "Пользователи") => {
+	console.log(sheet);
 	await clearSheet(sheet);
 	await createSheet(sheet);
 	console.log("Sheet reloaded");
@@ -106,6 +108,6 @@ export const reloadSheet = async (sheet: string = "Пользователи") =>
 export const reloadAllSheets = async () => {
 	const sheets = ["Пользователи", "Организации"];
 	for (const sheet of sheets) {
-		reloadSheet(sheet);
+		await reloadSheet(sheet);
 	}
 };
