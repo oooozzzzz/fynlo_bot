@@ -350,7 +350,10 @@ async function sendInfoBlockToUser(
 
 export async function sendNextInfoBlock(
 	userId: number,
-	inlineKeyboard?: InlineKeyboardMarkup,
+	inlineKeyboard: InlineKeyboardMarkup = new InlineKeyboard().text(
+		"Я все понял(а)!",
+		"nextQuestion",
+	),
 ) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
@@ -359,6 +362,8 @@ export async function sendNextInfoBlock(
 	const infoBlock = await prisma.infoBlock.findFirst({
 		where: { order: user.currentInfoBlockOrder },
 	});
+
+	console.log(infoBlock);
 
 	if (!infoBlock) {
 		console.log(`Пользователь ${userId} завершил все инфоблоки.`);
@@ -445,10 +450,7 @@ export async function sendNextQuestion(userId: number) {
 		// if (process.env.NODE_ENV === "dev") {
 		// 	await api.sendMessage(userId, "Для наглядности ");
 		// }
-		await sendNextInfoBlock(
-			userId,
-			new InlineKeyboard().text("Я все понял(а)!", "nextQuestion"),
-		);
+		await sendNextInfoBlock(userId);
 		return;
 	}
 

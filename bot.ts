@@ -122,10 +122,11 @@ bot.command("start", async (ctx: MyContext) => {
 	if (!user.position) {
 		return await ctx.conversation.enter("createUserConversation");
 	}
+	if (ctx.session.isChatting) await ctx.reply("Диалог завершен");
 	await ctx.reply("Стартовый текст", { reply_markup: startMenu });
 });
 bot.command("id", async (ctx) => {
-	await ctx.reply(ctx.from!.id.toString());
+	await ctx.reply(ctx.chat!.id.toString());
 });
 bot.command("add_info", async (ctx) => {
 	await ctx.conversation.enter("createInfo");
@@ -162,13 +163,13 @@ bot.callbackQuery("adminMenu", async (ctx) => {
 });
 bot.callbackQuery("nextQuestion", async (ctx) => {
 	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Я все понял(а)!", "!"));
+	await ctx.reply("Сообщение с отливочным действием");
 	if (process.env.NODE_ENV !== "prod") {
 		await ctx.reply(
 			"Для удобства тестирования сейчас направляется следующий вопрос, но в продакшене тут будет отправляться текст с прощанием до завтра",
 		);
 		await sendNextQuestion(ctx.chat!.id);
 	}
-	await ctx.reply("Сообщение с отливочным действием");
 });
 
 bot.on("callback_query:data", async (ctx) => {

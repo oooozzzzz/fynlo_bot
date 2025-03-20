@@ -287,3 +287,97 @@ export const organizationsString = async () => {
 		.join("\n");
 	return orgs;
 };
+
+class ReminderSystem {
+	private users: Map<number, { stage: number; timers: NodeJS.Timeout[] }>;
+
+	constructor() {
+		this.users = new Map(); // Хранение данных о пользователях
+	}
+
+	// Метод для отправки сообщения и запуска таймеров
+	sendMessage(userId: number, message: string = "foo"): void {
+		console.log(`Сообщение отправлено пользователю ${userId}: ${message}`);
+
+		// Очищаем предыдущие таймеры, если они есть
+		this.clearUserTimers(userId);
+
+		// Сохраняем время отправки сообщения и этап напоминания
+		this.users.set(userId, {
+			stage: 0, // Этап напоминания (0 - начальный)
+			timers: [], // Таймеры для напоминаний
+		});
+
+		// Запускаем таймеры для напоминаний
+		this.setReminder(userId, 1 * 24 * 60 * 60 * 1000); // Через 1 день
+		this.setReminder(userId, 3 * 24 * 60 * 60 * 1000); // Через 3 дня (1 + 2)
+		this.setReminder(userId, 7 * 24 * 60 * 60 * 1000); // Через 7 дней (1 + 2 + 4)
+	}
+
+	// Метод для установки напоминания
+	private setReminder(userId: number, delay: number): void {
+		const timer = setTimeout(() => {
+			this.sendReminder(userId);
+		}, delay);
+
+		// Сохраняем таймер в объекте пользователя
+		const user = this.users.get(userId);
+		if (user) {
+			user.timers.push(timer);
+		}
+	}
+
+	// Метод для отправки напоминания
+	private async sendReminder(userId: number): Promise<void> {
+		const user = this.users.get(userId);
+		if (!user) return;
+
+		user.stage += 1;
+		if (user.stage < 3) {
+			await api.sendMessage(
+				userId,
+				`Напоминаем, что еще остались незаконченные вопросы! Ты можешь продолжить обучение, ответив на вопросы выше.`,
+			);
+			console.log(
+				`Напоминание ${user.stage} отправлено пользователю ${userId}`,
+			);
+		} else {
+			//TODO: отправить напоминание в конфу с логами
+		}
+
+		// Если это последнее напоминание, удаляем пользователя из системы
+		if (user.stage === 3) {
+			this.clearUser(userId);
+		}
+	}
+
+	// Метод для обработки ответа пользователя
+	handleUserResponse(userId: number, responseMessage?: string): void {
+		console.log(`Пользователь ${userId} ответил: ${responseMessage}`);
+
+		// Очищаем текущие таймеры
+		this.clearUserTimers(userId);
+
+		// Отправляем новое сообщение и устанавливаем новые таймеры
+		this.sendMessage(userId);
+	}
+
+	// Метод для очистки таймеров пользователя
+	private clearUserTimers(userId: number): void {
+		const user = this.users.get(userId);
+		if (user) {
+			// Очищаем все таймеры
+			user.timers.forEach((timer) => clearTimeout(timer));
+			user.timers = [];
+		}
+	}
+
+	// Метод для удаления пользователя из системы
+	private clearUser(userId: number): void {
+		this.clearUserTimers(userId);
+		this.users.delete(userId);
+	}
+}
+
+// Пример использования
+export const reminderSystem = new ReminderSystem();
