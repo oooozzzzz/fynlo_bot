@@ -116,7 +116,7 @@ bot.api.setMyCommands([
 
 bot.command("start", async (ctx: MyContext) => {
 	const user = await createUser({
-		id: ctx.from!.id,
+		id: ctx.from!.id.toString(),
 	});
 	ctx.session.isChatting = false;
 	if (!user.position) {
@@ -139,10 +139,10 @@ bot.command("show_info", async (ctx) => {
 	await sendInfo(ctx);
 });
 bot.command("next_question", async (ctx) => {
-	await sendNextQuestion(ctx.chat!.id);
+	await sendNextQuestion(ctx.chat!.id.toString());
 });
 bot.command("delete", async (ctx) => {
-	const result = await deleteUser(ctx.from!.id);
+	const result = await deleteUser(ctx.from!.id.toString());
 	if (result) {
 		await ctx.reply("Пользователь удален");
 	} else {
@@ -153,7 +153,7 @@ bot.command("next_info", async (ctx) => {
 	await ctx.reply(
 		"Следующий инфоблок: \n\nЕсли ничего нет, значит инфоблоки кончились",
 	);
-	await sendNextInfoBlock(ctx.chat!.id);
+	await sendNextInfoBlock(ctx.chat!.id.toString());
 	// await sendNextQuestion(ctx.chat!.id);
 });
 
@@ -168,7 +168,7 @@ bot.callbackQuery("nextQuestion", async (ctx) => {
 		await ctx.reply(
 			"Для удобства тестирования сейчас направляется следующий вопрос, но в продакшене тут будет отправляться текст с прощанием до завтра",
 		);
-		await sendNextQuestion(ctx.chat!.id);
+		await sendNextQuestion(ctx.chat!.id.toString());
 	}
 });
 
@@ -186,12 +186,12 @@ bot.command("rm_org", async (ctx) => {
 	res ? await ctx.reply("Организация удалена") : await ctx.reply("Ошибка");
 });
 bot.command("clear_history", async (ctx) => {
-	await clearInfoInUser(ctx.chat.id);
+	await clearInfoInUser(ctx.chat.id.toString());
 	await ctx.reply("История очищена");
 });
 bot.command("questions", async (ctx) => await sendQuestions(ctx));
 bot.command("add", async (ctx) => {
-	await addUserToSheets(ctx.from!.id);
+	await addUserToSheets(ctx.from!.id.toString());
 });
 
 bot.on("message", async (ctx: MyContext) => {

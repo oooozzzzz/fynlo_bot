@@ -12,7 +12,7 @@ import { toAdminMenuKeyboard } from "../inline_keyboards/toAdminMenuKeyboard.js"
 export const sendOutConversation = async (
 	conversation: MyConversation,
 	ctx: MyConversationContext,
-	recievers: number[],
+	recievers: string[],
 ) => {
 	const start = conversation.checkpoint();
 	await ctx.reply("Введите текст рассылки", {
@@ -44,9 +44,9 @@ export const sendOutConversation = async (
 		update.answerCallbackQuery();
 		const duration = calculateDuration(150, recievers.length);
 		await ctx.reply(`Рассылка началась. Это займет примерно ${duration}`);
-		const result = await processArrayAsync(
+		const result = await processArrayAsync<string>(
 			recievers,
-			async (reciever: number) => {
+			async (reciever: string) => {
 				await ctx.api.copyMessage(
 					reciever,
 					ctx.from!.id,

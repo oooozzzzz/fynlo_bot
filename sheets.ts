@@ -11,7 +11,7 @@ const auth = new google.auth.GoogleAuth({
 const spreadsheetId = "1PpeUNm7DkQYovXwmMvGsR-PbRmGtIcPYu2KoVkhwFis";
 const sheets = google.sheets({ version: "v4", auth });
 
-export const addUserToSheets = async (id: number) => {
+export const addUserToSheets = async (id: string) => {
 	const user = await getUser(id);
 	console.log(user);
 	if (user) {

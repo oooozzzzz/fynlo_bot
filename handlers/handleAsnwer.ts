@@ -6,5 +6,9 @@ export const handleAnswer = async (ctx: Context, data: string[]) => {
 	await ctx.answerCallbackQuery(
 		isCorrect === "correct" ? "Правильно" : "Неправильно",
 	);
-	await handleAnswerDB(ctx.chat!.id, parseInt(questionId), parseInt(answerId));
+	await handleAnswerDB(
+		ctx.chat!.id.toString(),
+		parseInt(questionId),
+		parseInt(answerId),
+	);
 };
