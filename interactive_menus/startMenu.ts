@@ -12,5 +12,10 @@ export const startMenu = new Menu<MyContext>("startMenu")
 	.row()
 	.text("Начать обучение", async (ctx) => {
 		console.log(ctx.msg?.from?.id);
-		await sendNextInfoBlock(ctx.msg?.chat?.id!);
+		const res = await sendNextInfoBlock(ctx.msg?.chat?.id!);
+		if (!res) {
+			await ctx.reply(
+				"На сегодня весь блок информации изучен, до встречи завтра!",
+			);
+		}
 	});

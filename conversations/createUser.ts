@@ -58,10 +58,11 @@ export const createUserConversation = async (
 			"Добро пожаловать! Используйте команды, чтобы наполнить бота контентом",
 		);
 		await createUser({
-			id: ctx.from!.id,
+			id: ctx.from!.id.toString(),
 			phoneNumber: contact.phone_number!,
 			firstName: name,
 			position: "Администратор бота",
+			nickname: ctx.from?.username,
 		});
 		return await conversation.halt();
 	}
@@ -72,7 +73,7 @@ export const createUserConversation = async (
 
 	const position = await conversation.form.text();
 	const user = await createUser({
-		id: ctx.from!.id,
+		id: ctx.from!.id.toString(),
 		phoneNumber: contact.phone_number!,
 		firstName: name,
 		organization: { connect: { id: Number(organizationId.message!.text!) } },

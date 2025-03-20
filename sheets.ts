@@ -77,6 +77,8 @@ export const createSheet = async (sheet = "Пользователи") => {
 				user.position,
 				user.currentInfoBlockOrder,
 				user.organization?.id,
+				user.nickname,
+				user.id,
 			]);
 			break;
 		case "Организации":

@@ -6,6 +6,7 @@ import {
 	getInfoById,
 	getQuestionsDB,
 	gettAllInfo,
+	getUser,
 } from "./prisma/db.js";
 import { questionKeyboard } from "./inline_keyboards/questionsKeyboard.js";
 import { Prisma } from "@prisma/client";
@@ -85,7 +86,7 @@ export function splitCommaSeparatedString(input: string): string[] {
 
 export const sendQuestion = async (
 	question: Prisma.QuestionGetPayload<{ include: { answers: true } }>,
-	userId: number,
+	userId: string,
 	addButtons: boolean = false,
 ) => {
 	const text = question.text;
@@ -123,7 +124,7 @@ export const sendQuestions = async (ctx: Context) => {
 		return;
 	}
 	for (const question of questions) {
-		await sendQuestion(question, ctx.chat!.id);
+		await sendQuestion(question, ctx.chat!.id.toString());
 		await delay(300);
 	}
 };
@@ -174,7 +175,7 @@ export const sendInfoBlock = async (
 	}
 	const questions = infoBlock.questions;
 	for (const question of questions) {
-		await sendQuestion(question, ctx.chat!.id, addMenus);
+		await sendQuestion(question, ctx.chat!.id.toString(), addMenus);
 	}
 };
 
@@ -289,14 +290,14 @@ export const organizationsString = async () => {
 };
 
 class ReminderSystem {
-	private users: Map<number, { stage: number; timers: NodeJS.Timeout[] }>;
+	private users: Map<string, { stage: number; timers: NodeJS.Timeout[] }>;
 
 	constructor() {
 		this.users = new Map(); // Хранение данных о пользователях
 	}
 
 	// Метод для отправки сообщения и запуска таймеров
-	sendMessage(userId: number, message: string = "foo"): void {
+	sendMessage(userId: string, message: string = "foo"): void {
 		console.log(`Сообщение отправлено пользователю ${userId}: ${message}`);
 
 		// Очищаем предыдущие таймеры, если они есть
@@ -315,7 +316,7 @@ class ReminderSystem {
 	}
 
 	// Метод для установки напоминания
-	private setReminder(userId: number, delay: number): void {
+	private setReminder(userId: string, delay: number): void {
 		const timer = setTimeout(() => {
 			this.sendReminder(userId);
 		}, delay);
@@ -328,7 +329,7 @@ class ReminderSystem {
 	}
 
 	// Метод для отправки напоминания
-	private async sendReminder(userId: number): Promise<void> {
+	private async sendReminder(userId: string): Promise<void> {
 		const user = this.users.get(userId);
 		if (!user) return;
 
@@ -342,7 +343,13 @@ class ReminderSystem {
 				`Напоминание ${user.stage} отправлено пользователю ${userId}`,
 			);
 		} else {
-			//TODO: отправить напоминание в конфу с логами
+			const user = await getUser(userId);
+			await api.sendMessage(
+				-1002578844283,
+				`Пользователь @${user!.nickname} из организации ${
+					user!.organization?.name
+				} не продолжил обучение. Телефон пользователя: ${user!.phoneNumber}`,
+			);
 		}
 
 		// Если это последнее напоминание, удаляем пользователя из системы
@@ -352,7 +359,7 @@ class ReminderSystem {
 	}
 
 	// Метод для обработки ответа пользователя
-	handleUserResponse(userId: number, responseMessage?: string): void {
+	handleUserResponse(userId: string, responseMessage?: string): void {
 		console.log(`Пользователь ${userId} ответил: ${responseMessage}`);
 
 		// Очищаем текущие таймеры
@@ -363,7 +370,7 @@ class ReminderSystem {
 	}
 
 	// Метод для очистки таймеров пользователя
-	private clearUserTimers(userId: number): void {
+	private clearUserTimers(userId: string): void {
 		const user = this.users.get(userId);
 		if (user) {
 			// Очищаем все таймеры
@@ -373,7 +380,7 @@ class ReminderSystem {
 	}
 
 	// Метод для удаления пользователя из системы
-	private clearUser(userId: number): void {
+	private clearUser(userId: string): void {
 		this.clearUserTimers(userId);
 		this.users.delete(userId);
 	}

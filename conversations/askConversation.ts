@@ -50,7 +50,7 @@ export const askQuestion = async (
 	}
 	await ctx.api.deleteMessage(beginning.chat.id, beginning.message_id);
 	await ctx.api.sendMessage(
-		2578844283,
+		-1002578844283,
 		`Вопрос от @${questionCtx.from?.username}\n\n${question}`,
 		{ reply_markup: generateAnswerKeyboard(questionCtx.from?.id!) },
 	);

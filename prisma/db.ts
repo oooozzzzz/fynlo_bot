@@ -50,7 +50,7 @@ export const createUser = async (data: Prisma.UserCreateInput) => {
 	return userUpdated;
 };
 
-export const deleteUser = async (id: number) => {
+export const deleteUser = async (id: string) => {
 	try {
 		const user = await prisma.user.delete({ where: { id } });
 		console.log("User deleted");
@@ -61,7 +61,7 @@ export const deleteUser = async (id: number) => {
 	}
 };
 
-export const getUser = async (id: number) =>
+export const getUser = async (id: string) =>
 	await prisma.user.findUnique({
 		where: { id },
 		include: { organization: true },
@@ -310,7 +310,7 @@ export const deleteInfoBlock = async (infoBlockId: number) => {
 };
 
 async function sendInfoBlockToUser(
-	userId: number,
+	userId: string,
 	infoBlock: Prisma.InfoBlockGetPayload<{ include: { questions: false } }>,
 	inlineKeyboard?:
 		| InlineKeyboardMarkup
@@ -349,7 +349,7 @@ async function sendInfoBlockToUser(
 }
 
 export async function sendNextInfoBlock(
-	userId: number,
+	userId: string,
 	inlineKeyboard: InlineKeyboardMarkup = new InlineKeyboard().text(
 		"Я все понял(а)!",
 		"nextQuestion",
@@ -363,11 +363,9 @@ export async function sendNextInfoBlock(
 		where: { order: user.currentInfoBlockOrder },
 	});
 
-	console.log(infoBlock);
-
 	if (!infoBlock) {
 		console.log(`Пользователь ${userId} завершил все инфоблоки.`);
-		return;
+		return false;
 	}
 
 	// Отправляем инфоблок пользователю
@@ -381,7 +379,7 @@ export async function sendNextInfoBlock(
 }
 
 export async function sendQuestionToUser(
-	userId: number,
+	userId: string,
 	question: Prisma.QuestionGetPayload<{ include: { answers: true } }>,
 ) {
 	// Логика отправки (например, через email, API или WebSocket)
@@ -398,7 +396,7 @@ export async function sendQuestionToUser(
 	});
 }
 
-export async function sendNextQuestion(userId: number) {
+export async function sendNextQuestion(userId: string) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
 	console.log(user);
@@ -465,7 +463,7 @@ export async function sendNextQuestion(userId: number) {
 }
 
 export async function handleAnswerDB(
-	userId: number,
+	userId: string,
 	questionId: number,
 	answerId: number,
 ) {
@@ -577,7 +575,7 @@ export const organizationExists = async (id: number) => {
 	return result;
 };
 
-export const clearInfoInUser = async (id: number) => {
+export const clearInfoInUser = async (id: string) => {
 	const user = await prisma.user.update({
 		where: { id },
 		data: { currentInfoBlockOrder: 1, infoBlockResendCount: 0 },

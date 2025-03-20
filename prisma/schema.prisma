@@ -9,10 +9,11 @@ datasource db {
 
 model User {
   createdAt               DateTime           @default(now())
-  id                      Int                @id
+  id                      String             @id
   firstName               String?            @map("first_name")
   phoneNumber             String?            @map("phone_number")
   position                String?
+  nickname                String?
   stage                   Int                @default(1)
   questions               Question[]
   answers                 Answer[]
@@ -49,7 +50,7 @@ model Answer {
   text          String
   isCorrect     Boolean         @map("is_correct")
   User          User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int?
+  userId        String?
   recievedAt    DateTime?
   AnswerHistory AnswerHistory[]
 }
@@ -76,7 +77,7 @@ model Organization {
 
 model AnswerHistory {
   id         Int      @id @default(autoincrement())
-  userId     Int
+  userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   questionId Int
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -92,7 +93,7 @@ model AnswerHistory {
 
 model InfoBlockHistory {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   infoBlockId Int
   infoBlock   InfoBlock @relation(fields: [infoBlockId], references: [id], onDelete: Cascade)
@@ -102,7 +103,7 @@ model InfoBlockHistory {
 
 model QuestionHistory {
   id         Int      @id @default(autoincrement())
-  userId     Int
+  userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   questionId Int
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
