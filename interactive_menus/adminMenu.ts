@@ -55,6 +55,10 @@ const sendOutMenu = new Menu<MyContext>("sendOutMenu")
 		await ctx.conversation.enter("sendToOrganization");
 	})
 	.row()
+	.text("Отправить вопрос", async (ctx) => {
+		await ctx.conversation.enter("sendOutQuestion");
+	})
+	.row()
 	.text("Назад", async (ctx) => {
 		ctx.menu.back();
 	});

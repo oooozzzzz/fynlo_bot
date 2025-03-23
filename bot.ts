@@ -49,6 +49,7 @@ import {
 	answerQuestion,
 	askQuestion,
 } from "./conversations/askConversation.js";
+import { sendOutQuestion } from "./conversations/sendOutQuestion.js";
 
 interface SessionData {
 	isChatting: boolean;
@@ -83,6 +84,7 @@ bot.use(
 	}),
 );
 bot.use(createConversation(introduce));
+bot.use(createConversation(sendOutQuestion));
 bot.use(createConversation(askQuestion));
 bot.use(createConversation(answerQuestion));
 bot.use(createConversation(sendToOrganization));

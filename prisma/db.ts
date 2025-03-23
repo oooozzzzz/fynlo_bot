@@ -37,7 +37,11 @@ export const createQuestionsDB = async (
 		const question = await prisma.question.create({
 			data: { text, order, answers: { createMany: { data: answers } } },
 		});
-		return question;
+		const returnQuestion = await prisma.question.findUniqueOrThrow({
+			where: { id: question.id },
+			include: { answers: true },
+		});
+		return returnQuestion;
 	} catch (error) {
 		console.log(error);
 		return false;
@@ -457,21 +461,6 @@ export async function sendNextQuestion(userId: string) {
 				currentQuestionId: null, // Сбрасываем текущий вопрос
 			},
 		});
-
-		// Отправляем следующий инфоблок
-		// await sendDailyInfoBlock(userId);
-		// const newInfoBlock = await prisma.infoBlock.findFirst({
-		// 	where: { order: user.currentInfoBlockOrder },
-		// });
-		// console.log(newInfoBlock);
-		// if (!newInfoBlock) {
-		// 	await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
-		// } else {
-		// 	await api.sendMessage(
-		// 		userId,
-		// 		"Отлично, так держать! Теперь переходим к новому блоку информации",
-		// 	);
-		// }
 		await sendNextInfoBlock(userId);
 		return;
 	}

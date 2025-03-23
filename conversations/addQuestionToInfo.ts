@@ -12,5 +12,4 @@ export const addQuestionConversation = async (
 	const question = await createQuestion(conversation, ctx);
 	if (!question) return;
 	await addQuestionToInfo(infoId, question.id);
-	await ctx.reply("Вопрос добавлен");
 };
