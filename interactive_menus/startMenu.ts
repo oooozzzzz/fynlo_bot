@@ -1,6 +1,6 @@
 import { Menu } from "@grammyjs/menu";
 import { MyContext } from "../bot.js";
-import { sendNextInfoBlock } from "../prisma/db.js";
+import { hasFinishedInfoBlocks, sendNextInfoBlock } from "../prisma/db.js";
 
 export const startMenu = new Menu<MyContext>("startMenu")
 	.text("База знаний", async (ctx) => {
@@ -10,8 +10,12 @@ export const startMenu = new Menu<MyContext>("startMenu")
 		ctx.session.isChatting = true;
 	})
 	.row()
-	.text("Начать обучение", async (ctx) => {
-		console.log(ctx.msg?.from?.id);
+	.text("Приступить к обучению", async (ctx) => {
+		if (await hasFinishedInfoBlocks(ctx.msg?.chat?.id.toString()!)) {
+			return ctx.reply(
+				"Вы уже прошли обучение. Вы можете спросить нашего ИИ бота о продукте. Для этого перейдите в раздел База знаний",
+			);
+		}
 		const res = await sendNextInfoBlock(ctx.msg?.chat?.id.toString()!);
 		if (!res) {
 			await ctx.reply(

@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { api } from "../bot.js";
-import { sendQuestion } from "../serviceFunctions.js";
+import { ReminderSystem, sendQuestion } from "../serviceFunctions.js";
 import {
 	ForceReply,
 	InlineKeyboardMarkup,
@@ -10,6 +10,9 @@ import {
 import { InlineKeyboard } from "grammy";
 
 export const prisma = new PrismaClient();
+const questionsReminder = new ReminderSystem(
+	"У вас остались незаконченные вопросы. Ответьте на них, чтобы продолжить обучение.",
+);
 
 export const createQuestionsDB = async (
 	text: string,
@@ -352,11 +355,11 @@ export async function sendNextInfoBlock(
 	userId: string,
 	inlineKeyboard: InlineKeyboardMarkup = new InlineKeyboard().text(
 		"Я все понял(а)!",
-		"nextQuestion",
+		"handleInfoBlock",
 	),
 ) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
-	if (!user) return;
+	if (!user) return false;
 
 	// Находим инфоблок по currentInfoBlockOrder
 	const infoBlock = await prisma.infoBlock.findFirst({
@@ -364,9 +367,14 @@ export async function sendNextInfoBlock(
 	});
 
 	if (!infoBlock) {
+		await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
 		console.log(`Пользователь ${userId} завершил все инфоблоки.`);
 		return false;
 	}
+	await api.sendMessage(
+		userId,
+		"Отлично, так держать! Теперь переходим к новому блоку информации",
+	);
 
 	// Отправляем инфоблок пользователю
 	await sendInfoBlockToUser(userId, infoBlock, inlineKeyboard);
@@ -376,6 +384,7 @@ export async function sendNextInfoBlock(
 		where: { id: userId },
 		data: { currentQuestionId: null },
 	});
+	return true;
 }
 
 export async function sendQuestionToUser(
@@ -383,6 +392,8 @@ export async function sendQuestionToUser(
 	question: Prisma.QuestionGetPayload<{ include: { answers: true } }>,
 ) {
 	// Логика отправки (например, через email, API или WebSocket)
+	//TODO:
+	questionsReminder.sendMessage(userId);
 	await sendQuestion(question, userId);
 	console.log(`Пользователь ${userId} получает вопрос:`, question.text);
 
@@ -396,10 +407,18 @@ export async function sendQuestionToUser(
 	});
 }
 
+export const hasFinishedInfoBlocks = async (userId: string) => {
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+	if (!user) return false;
+	const infoBlock = await prisma.infoBlock.findFirst({
+		where: { order: user.currentInfoBlockOrder },
+	});
+	if (!infoBlock) return true;
+	return false;
+};
 export async function sendNextQuestion(userId: string) {
 	const user = await prisma.user.findUnique({ where: { id: userId } });
 	if (!user) return;
-	console.log(user);
 
 	// Находим текущий инфоблок
 	const infoBlock = await prisma.infoBlock.findFirst({
@@ -441,12 +460,17 @@ export async function sendNextQuestion(userId: string) {
 
 		// Отправляем следующий инфоблок
 		// await sendDailyInfoBlock(userId);
-		await api.sendMessage(
-			userId,
-			"Отлично, так держать! Теперь переходим к новому блоку информации",
-		);
-		// if (process.env.NODE_ENV === "dev") {
-		// 	await api.sendMessage(userId, "Для наглядности ");
+		// const newInfoBlock = await prisma.infoBlock.findFirst({
+		// 	where: { order: user.currentInfoBlockOrder },
+		// });
+		// console.log(newInfoBlock);
+		// if (!newInfoBlock) {
+		// 	await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
+		// } else {
+		// 	await api.sendMessage(
+		// 		userId,
+		// 		"Отлично, так держать! Теперь переходим к новому блоку информации",
+		// 	);
 		// }
 		await sendNextInfoBlock(userId);
 		return;
@@ -467,6 +491,7 @@ export async function handleAnswerDB(
 	questionId: number,
 	answerId: number,
 ) {
+	questionsReminder.handleUserResponse(userId);
 	const MAX_RESEND_COUNT = 3; // Максимальное количество повторов
 	// Шаг 1: Проверяем, прошел ли пользователь все инфоблоки
 	const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -499,8 +524,6 @@ export async function handleAnswerDB(
 		},
 	});
 
-	console.log(updatedUser);
-
 	// Шаг 3: Если ответ правильный, отправляем следующий вопрос
 	if (answer.isCorrect) {
 		await sendNextQuestion(userId);
@@ -522,7 +545,7 @@ export async function handleAnswerDB(
 				await api.sendMessage(
 					userId,
 					// тексто после двух неправильных ответов подярд
-					"Текст после двух неправильных ответов подряд",
+					"Вы дважды неправильно ответили на вопрос. Направляем Вам информационный блок повторно.",
 				);
 				await sendInfoBlockToUser(
 					userId,

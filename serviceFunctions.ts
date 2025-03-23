@@ -289,17 +289,19 @@ export const organizationsString = async () => {
 	return orgs;
 };
 
-class ReminderSystem {
+export class ReminderSystem {
 	private users: Map<string, { stage: number; timers: NodeJS.Timeout[] }>;
+	private message: string;
 
-	constructor() {
+	constructor(
+		message: string = "foo", // Сообщение для первого напоминания
+	) {
+		this.message = message || "foo"; // Сообщение для первого напоминания
 		this.users = new Map(); // Хранение данных о пользователях
 	}
 
 	// Метод для отправки сообщения и запуска таймеров
 	sendMessage(userId: string, message: string = "foo"): void {
-		console.log(`Сообщение отправлено пользователю ${userId}: ${message}`);
-
 		// Очищаем предыдущие таймеры, если они есть
 		this.clearUserTimers(userId);
 
@@ -335,10 +337,7 @@ class ReminderSystem {
 
 		user.stage += 1;
 		if (user.stage < 3) {
-			await api.sendMessage(
-				userId,
-				`Напоминаем, что еще остались незаконченные вопросы! Ты можешь продолжить обучение, ответив на вопросы выше.`,
-			);
+			await api.sendMessage(userId, this.message);
 			console.log(
 				`Напоминание ${user.stage} отправлено пользователю ${userId}`,
 			);
@@ -360,8 +359,6 @@ class ReminderSystem {
 
 	// Метод для обработки ответа пользователя
 	handleUserResponse(userId: string, responseMessage?: string): void {
-		console.log(`Пользователь ${userId} ответил: ${responseMessage}`);
-
 		// Очищаем текущие таймеры
 		this.clearUserTimers(userId);
 

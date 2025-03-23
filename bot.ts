@@ -122,7 +122,10 @@ bot.command("start", async (ctx: MyContext) => {
 	if (!user.position) {
 		return await ctx.conversation.enter("createUserConversation");
 	}
-	if (ctx.session.isChatting) await ctx.reply("Диалог завершен");
+	if (ctx.session.isChatting) {
+		await ctx.reply("Диалог завершен");
+		await agent.clearMessageHistory(ctx.chat!.id.toString());
+	}
 	await ctx.reply("Стартовый текст", { reply_markup: startMenu });
 });
 bot.command("id", async (ctx) => {
@@ -161,15 +164,23 @@ bot.callbackQuery("adminMenu", async (ctx) => {
 	ctx.msg?.delete();
 	await ctx.reply("Панель администратора", { reply_markup: adminMenu });
 });
-bot.callbackQuery("nextQuestion", async (ctx) => {
+bot.callbackQuery("handleInfoBlock", async (ctx) => {
 	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Я все понял(а)!", "!"));
-	await ctx.reply("Сообщение с отливочным действием");
+	await ctx.reply(
+		"Отлично! Встретимся завтра, чтобы проверить полученные знания.",
+	);
 	if (process.env.NODE_ENV !== "prod") {
 		await ctx.reply(
 			"Для удобства тестирования сейчас направляется следующий вопрос, но в продакшене тут будет отправляться текст с прощанием до завтра",
 		);
 		await sendNextQuestion(ctx.chat!.id.toString());
 	}
+});
+bot.callbackQuery("nextQuestion", async (ctx) => {
+	console.log(ctx.update.callback_query);
+	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Да!", "!"));
+
+	await sendNextQuestion(ctx.chat!.id.toString());
 });
 
 bot.on("callback_query:data", async (ctx) => {
