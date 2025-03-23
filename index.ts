@@ -13,7 +13,7 @@ async function main() {
 	});
 	cron
 		.schedule(
-			"10 * * * * *",
+			"0 0 16 * * *",
 			async () => {
 				const users = await getAllUsers();
 				for (const user of users) {
