@@ -163,7 +163,11 @@ bot.command("next_info", async (ctx) => {
 });
 
 bot.callbackQuery("adminMenu", async (ctx) => {
-	ctx.msg?.delete();
+	try {
+		ctx.msg?.delete();
+	} catch (error) {
+		console.log("fuck");
+	}
 	await ctx.reply("Панель администратора", { reply_markup: adminMenu });
 });
 bot.callbackQuery("handleInfoBlock", async (ctx) => {
@@ -208,6 +212,8 @@ bot.command("add", async (ctx) => {
 });
 
 bot.on("message", async (ctx: MyContext) => {
+	console.log(ctx.message?.text, ctx.message?.entities);
+	console.log(ctx.entities());
 	if (ctx.session.isChatting) {
 		const response = await agent.ask(
 			ctx.message!.text!,

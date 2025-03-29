@@ -3,9 +3,11 @@ import { Context } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
 import { toAdminMenu } from "../routes/toMenus.js";
 import {
+	applyMarkdownV2,
 	checkForCancel,
 	isCommaSeparatedWords,
 	splitCommaSeparatedString,
+	TextEntity,
 } from "../serviceFunctions.js";
 import {
 	createInfoDB,
@@ -14,6 +16,7 @@ import {
 } from "../prisma/db.js";
 import { infoBlockMenu } from "../inline_keyboards/infoBlockMenu.js";
 import { MyConversation } from "../bot.js";
+import { MessageEntity } from "grammy/types";
 
 export const createInfo = async (
 	conversation: MyConversation,
@@ -22,9 +25,12 @@ export const createInfo = async (
 	await ctx.reply("Введите текст информационного блока", {
 		reply_markup: cancelKeyboard("Отмена"),
 	});
-
+	let entities: MessageEntity[] | undefined = [];
 	const text = await conversation.form.text({
 		otherwise: (ctx) => checkForCancel(ctx, conversation, toAdminMenu),
+		action: (ctx) => {
+			entities = ctx.message?.entities;
+		},
 	});
 	await ctx.reply("Укажите порядок информационного блока", {
 		reply_markup: cancelKeyboard("Отмена"),
@@ -71,7 +77,7 @@ export const createInfo = async (
 	}
 
 	const infoBlock = await createInfoDB({
-		text,
+		text: applyMarkdownV2({ text, entities }),
 		order,
 		photo: photoId,
 		video: videoId,
@@ -82,14 +88,17 @@ export const createInfo = async (
 			? await ctx.replyWithPhoto(infoBlock.photo, {
 					caption: infoBlock.text,
 					reply_markup: infoBlockMenu(infoBlock),
+					parse_mode: "MarkdownV2",
 			  })
 			: infoBlock.video
 			? await ctx.replyWithVideo(infoBlock.video, {
 					caption: infoBlock.text,
 					reply_markup: infoBlockMenu(infoBlock),
+					parse_mode: "MarkdownV2",
 			  })
 			: await ctx.reply(infoBlock.text, {
 					reply_markup: infoBlockMenu(infoBlock),
+					parse_mode: "MarkdownV2",
 			  });
 	}
 };

@@ -9,7 +9,7 @@ import { InlineKeyboard } from "grammy";
 import { delay } from "./serviceFunctions.js";
 async function main() {
 	bot.catch((err: Error) => {
-		console.error("Error while handling update", err);
+		console.log("Error while handling update", err);
 	});
 	cron
 		.schedule(

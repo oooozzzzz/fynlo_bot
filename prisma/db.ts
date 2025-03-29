@@ -4,6 +4,7 @@ import { ReminderSystem, sendQuestion } from "../serviceFunctions.js";
 import {
 	ForceReply,
 	InlineKeyboardMarkup,
+	ParseMode,
 	ReplyKeyboardMarkup,
 	ReplyKeyboardRemove,
 } from "grammy/types";
@@ -216,6 +217,7 @@ export const addPhotoToQuestion = async (
 };
 
 export const createInfoDB = async (data: Prisma.InfoBlockCreateInput) => {
+	console.log(data.order);
 	try {
 		await prisma.infoBlock.updateMany({
 			where: {
@@ -325,6 +327,7 @@ async function sendInfoBlockToUser(
 		| ReplyKeyboardRemove
 		| ForceReply
 		| undefined,
+	parse_mode: ParseMode = "MarkdownV2",
 ) {
 	// Логика отправки (например, через email, API или WebSocket)
 	console.log(`Пользователь ${userId} получает инфоблок`);
@@ -333,15 +336,18 @@ async function sendInfoBlockToUser(
 		await api.sendPhoto(userId, photo, {
 			caption: text,
 			reply_markup: inlineKeyboard,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 	if (video)
 		await api.sendVideo(userId, video, {
 			caption: text,
 			reply_markup: inlineKeyboard,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 	if (!photo && !video)
 		await api.sendMessage(userId, infoBlock.text, {
 			reply_markup: inlineKeyboard,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 
 	// Пример: сохраняем в истории отправок

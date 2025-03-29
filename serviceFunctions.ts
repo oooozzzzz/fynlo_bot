@@ -12,6 +12,7 @@ import { questionKeyboard } from "./inline_keyboards/questionsKeyboard.js";
 import { Prisma } from "@prisma/client";
 import { infoBlockMenu } from "./inline_keyboards/infoBlockMenu.js";
 import { api, MyConversation } from "./bot.js";
+import { MessageEntity, ParseMode } from "grammy/types";
 
 export const delay = async (ms: number) =>
 	new Promise((res) => setTimeout(res, ms));
@@ -88,6 +89,7 @@ export const sendQuestion = async (
 	question: Prisma.QuestionGetPayload<{ include: { answers: true } }>,
 	userId: string,
 	addButtons: boolean = false,
+	parse_mode: ParseMode = "MarkdownV2",
 ) => {
 	const text = question.text;
 	const photo = question.photo;
@@ -102,6 +104,7 @@ export const sendQuestion = async (
 		await api.sendPhoto(userId!, photo, {
 			caption: message,
 			reply_markup: questionKeyboard(question, addButtons),
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 		// await ctx.replyWithPhoto(photo, {
 		// 	caption: message,
@@ -110,6 +113,7 @@ export const sendQuestion = async (
 	} else {
 		await api.sendMessage(userId!, message, {
 			reply_markup: questionKeyboard(question, addButtons),
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 		// await ctx.reply(message, {
 		// 	reply_markup: questionKeyboard(question),
@@ -151,6 +155,7 @@ export const sendInfoBlock = async (
 	}>,
 	ctx: Context,
 	addMenus: boolean,
+	parse_mode: ParseMode = "MarkdownV2",
 ) => {
 	const text = infoBlock.text;
 	let message;
@@ -162,15 +167,18 @@ export const sendInfoBlock = async (
 		await ctx.replyWithPhoto(photo, {
 			caption: message,
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 	} else if (infoBlock.video) {
 		await ctx.replyWithVideo(infoBlock.video, {
 			caption: message,
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 	} else {
 		await ctx.reply(message, {
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
+			parse_mode: parse_mode ? parse_mode : undefined,
 		});
 	}
 	const questions = infoBlock.questions;
@@ -385,3 +393,90 @@ export class ReminderSystem {
 
 // Пример использования
 export const reminderSystem = new ReminderSystem();
+
+export interface TextEntity {
+	offset: number;
+	length: number;
+	type: "bold" | "italic" | "underline" | "strikethrough" | "code";
+}
+
+export interface FormattedText {
+	text: string;
+	entities: MessageEntity[];
+}
+
+// Экранирует спецсимволы Markdown V2
+function escapeMarkdown(text: string): string {
+	const specialChars = [
+		"_",
+		"*",
+		"[",
+		"]",
+		"(",
+		")",
+		"~",
+		"`",
+		">",
+		"#",
+		"+",
+		"-",
+		"=",
+		"|",
+		"{",
+		"}",
+		".",
+		"!",
+	];
+	let escapedText = "";
+	for (const char of text) {
+		if (specialChars.includes(char)) {
+			escapedText += "\\" + char;
+		} else {
+			escapedText += char;
+		}
+	}
+	return escapedText;
+}
+
+// Применяет Markdown-разметку к тексту (учитывает экранирование)
+export function applyMarkdownV2({ text, entities }: FormattedText): string {
+	// Сначала экранируем весь текст
+	let escapedText = escapeMarkdown(text);
+	if (!entities) return escapedText;
+
+	// Сортируем сущности в обратном порядке (для корректной вставки)
+	const sortedEntities = [...entities].sort((a, b) => b.offset - a.offset);
+
+	let result = escapedText;
+	for (const entity of sortedEntities) {
+		const { offset, length, type } = entity;
+		const start = offset;
+		const end = offset + length;
+
+		const selectedText = result.substring(start, end);
+		let formattedText = selectedText;
+
+		switch (type) {
+			case "bold":
+				formattedText = `*${selectedText}*`; // Жирный в MarkdownV2 (Telegram)
+				break;
+			case "italic":
+				formattedText = `_${selectedText}_`; // Курсив
+				break;
+			case "code":
+				formattedText = "`" + selectedText + "`";
+				break;
+			case "strikethrough":
+				formattedText = `~${selectedText}~`;
+				break;
+			// Другие типы...
+			default:
+				break;
+		}
+
+		// Вставляем форматированный текст
+		result = result.substring(0, start) + formattedText + result.substring(end);
+	}
+
+	return result;
+}
