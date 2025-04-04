@@ -99,22 +99,31 @@ bot.use(createConversation(addQuestionConversation));
 bot.use(adminMenu);
 bot.use(startMenu);
 
-bot.api.setMyCommands([
-	{
-		command: "start",
-		description: "Начать работу с ботом",
-	},
+if (process.env.NODE_ENV == "dev") {
+	bot.api.setMyCommands([
+		{
+			command: "start",
+			description: "Начать работу с ботом",
+		},
 
-	// { command: "question", description: "Создать вопрос" },
-	// { command: "delete", description: "Удалить пользователя" },
-	// { command: "clear_history", description: "Очистить историю ответов" },
-	// // { command: "questions", description: "Вывести все вопросы" },
-	// { command: "add_info", description: "Добавить инфоблок" },
-	// { command: "show_info", description: "Показать инфоблоки" },
-	// { command: "next_info", description: "Отправить следующий инфоблок" },
-	// { command: "next_question", description: "Отправить следующий вопрос" },
-	// { command: "create_organization", description: "Создать организацию" },
-]);
+		// { command: "question", description: "Создать вопрос" },
+		// { command: "delete", description: "Удалить пользователя" },
+		{ command: "clear_history", description: "Очистить историю ответов" },
+		// // { command: "questions", description: "Вывести все вопросы" },
+		// { command: "add_info", description: "Добавить инфоблок" },
+		{ command: "show_info", description: "Показать инфоблоки" },
+		// { command: "next_info", description: "Отправить следующий инфоблок" },
+		// { command: "next_question", description: "Отправить следующий вопрос" },
+		{ command: "create_organization", description: "Создать организацию" },
+	]);
+} else {
+	bot.api.setMyCommands([
+		{
+			command: "start",
+			description: "Начать работу с ботом",
+		},
+	]);
+}
 
 bot.command("start", async (ctx: MyContext) => {
 	const user = await createUser({
