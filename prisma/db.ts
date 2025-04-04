@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { api } from "../bot.js";
-import { ReminderSystem, sendQuestion } from "../serviceFunctions.js";
+import { delay, ReminderSystem, sendQuestion } from "../serviceFunctions.js";
 import {
 	ForceReply,
 	InlineKeyboardMarkup,
@@ -361,9 +361,41 @@ async function sendInfoBlockToUser(
 	});
 }
 
+export const sendInfoBlocks = async (userId: string) => {
+	// let infoExists = false;
+	let result = false;
+	while (true) {
+		const user = await prisma.user.findUnique({ where: { id: userId } });
+		if (!user) {
+			break;
+		}
+		const infoBlock = await prisma.infoBlock.findFirst({
+			where: { order: user.currentInfoBlockOrder },
+			include: { questions: true },
+		});
+		console.log(infoBlock);
+		if (!infoBlock) {
+			break;
+		}
+		const questions = infoBlock?.questions;
+		await sendNextInfoBlock(userId);
+		if (questions.length == 0) {
+			await prisma.user.update({
+				where: { id: userId },
+				data: { currentInfoBlockOrder: { increment: 1 } },
+			});
+			result = true;
+		} else {
+			break;
+		}
+		await delay(15000);
+	}
+	return result;
+};
+
 export async function sendNextInfoBlock(
 	userId: string,
-	inlineKeyboard: InlineKeyboardMarkup = new InlineKeyboard().text(
+	inlineKeyboard: InlineKeyboardMarkup | undefined = new InlineKeyboard().text(
 		"Я все понял(а)!",
 		"handleInfoBlock",
 	),
@@ -374,18 +406,20 @@ export async function sendNextInfoBlock(
 	// Находим инфоблок по currentInfoBlockOrder
 	const infoBlock = await prisma.infoBlock.findFirst({
 		where: { order: user.currentInfoBlockOrder },
+		include: { questions: true },
 	});
+	console.log(infoBlock);
 
 	if (!infoBlock) {
 		await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
 		console.log(`Пользователь ${userId} завершил все инфоблоки.`);
 		return false;
 	}
-	await api.sendMessage(
-		userId,
-		"Отлично, так держать! Теперь переходим к новому блоку информации",
-	);
-
+	// await api.sendMessage(
+	// 	userId,
+	// 	"Отлично, так держать! Теперь переходим к новому блоку информации",
+	// );
+	if (infoBlock.questions.length == 0) inlineKeyboard = undefined;
 	// Отправляем инфоблок пользователю
 	await sendInfoBlockToUser(userId, infoBlock, inlineKeyboard);
 
@@ -457,9 +491,14 @@ export async function sendNextQuestion(userId: string) {
 		// Если текущий вопрос не задан, начинаем с первого
 		currentQuestion = infoBlock.questions[0];
 	}
+	console.log(currentQuestion);
 
 	if (!currentQuestion) {
 		// Если вопросы закончились, переходим к следующему инфоблоку
+		await api.sendMessage(
+			userId,
+			"Отлично, так держать! Теперь переходим к новому блоку информации",
+		);
 		await prisma.user.update({
 			where: { id: userId },
 			data: {
@@ -497,6 +536,7 @@ export async function handleAnswerDB(
 		console.log(`Пользователь ${userId} уже завершил все инфоблоки.`);
 		return;
 	}
+	console.log("in3");
 	// Шаг 1: Находим ответ и проверяем корректность
 	const answer = await prisma.answer.findUnique({
 		where: { id: answerId },
@@ -506,9 +546,12 @@ export async function handleAnswerDB(
 	if (!answer || !answer.question) {
 		throw new Error("Ответ или вопрос не найден");
 	}
-	if (answer.question.order !== user.currentInfoBlockOrder) {
+	console.log(user);
+	console.log(answer.question);
+	if (answer.question.InfoBlock?.order !== user.currentInfoBlockOrder) {
 		return;
 	}
+	console.log("in4");
 
 	// Шаг 2: Обновляем данные пользователя
 	const updatedUser = await prisma.user.update({
