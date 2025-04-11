@@ -14,6 +14,7 @@ import {
 	sendInfo,
 } from "../serviceFunctions.js";
 import { reloadAllSheets, reloadSheet } from "../sheets.js";
+import { conversations } from "@grammyjs/conversations";
 
 export const adminMenu = new Menu<MyContext>("adminMenu")
 	.text("Информация", async (ctx) => {
@@ -92,6 +93,10 @@ const contentMenu = new Menu<MyContext>("contentMenu")
 	.row()
 	.text("Добавить информационный блок", async (ctx) => {
 		await ctx.conversation.enter("createInfo");
+	})
+	.row()
+	.text("Добавить медиагруппу", async (ctx) => {
+		await ctx.conversation.enter("createMediaGroupInfo");
 	})
 	.row()
 	.text("Добавить организацию", async (ctx) => {

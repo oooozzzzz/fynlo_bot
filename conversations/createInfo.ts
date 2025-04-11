@@ -1,5 +1,5 @@
 import { Conversation } from "@grammyjs/conversations";
-import { Context } from "grammy";
+import { Context, InputMediaBuilder } from "grammy";
 import { cancelKeyboard } from "../inline_keyboards/cancelKeyboard.js";
 import { toAdminMenu } from "../routes/toMenus.js";
 import {
@@ -16,7 +16,7 @@ import {
 } from "../prisma/db.js";
 import { infoBlockMenu } from "../inline_keyboards/infoBlockMenu.js";
 import { MyConversation } from "../bot.js";
-import { MessageEntity } from "grammy/types";
+import { InputFile, InputMediaPhoto, MessageEntity } from "grammy/types";
 
 export const createInfo = async (
 	conversation: MyConversation,
@@ -100,5 +100,80 @@ export const createInfo = async (
 					reply_markup: infoBlockMenu(infoBlock),
 					parse_mode: "MarkdownV2",
 			  });
+	}
+};
+
+export const createMediaGroupInfo = async (
+	conversation: MyConversation,
+	ctx: Context,
+) => {
+	await ctx.reply("Сколько фото или видео в медиагруппе?", {
+		reply_markup: cancelKeyboard("Отмена"),
+	});
+	const count = await conversation.form.number({
+		otherwise: (ctx) =>
+			checkForCancel(
+				ctx,
+				conversation,
+				toAdminMenu,
+				"Количество фото или видео в медиагруппе должно быть числом",
+			),
+	});
+
+	await ctx.reply(
+		"Пришлите медиагруппу, которую хотите добавить в качестве инфоблока",
+		{
+			reply_markup: cancelKeyboard("Отмена"),
+		},
+	);
+	let photos: string[] = [];
+	for (let i = 0; i < count; i++) {
+		const media = await conversation.waitUntil(
+			(ctx) => {
+				return (
+					Context.has.filterQuery(":photo")(ctx) ||
+					ctx.hasCallbackQuery("cancel") ||
+					Context.has.filterQuery(":video")(ctx)
+				);
+			},
+			{
+				otherwise: (ctx) => {
+					ctx.reply("Отправьте медиагруппу или воспользуйтесь кнопкой");
+				},
+			},
+		);
+
+		console.log(photos);
+
+		if (media.hasCallbackQuery("cancel")) {
+			media.answerCallbackQuery();
+		} else if (media.message?.photo) {
+			photos.push(media.message?.photo![0].file_id!);
+		}
+	}
+
+	await ctx.reply("Укажите порядок информационного блока", {
+		reply_markup: cancelKeyboard("Отмена"),
+	});
+	const order = await conversation.form.number({
+		otherwise: (ctx) =>
+			checkForCancel(
+				ctx,
+				conversation,
+				toAdminMenu,
+				"Порядковый номер информационного блока должен быть числом",
+			),
+	});
+	const infoBlock = await createInfoDB({
+		text: "",
+		order,
+		photo: JSON.stringify(photos),
+	});
+	if (infoBlock) {
+		await ctx.reply("Информационный блок создан");
+		const photos: string[] = JSON.parse(infoBlock.photo!);
+		const media = photos.map((path) => InputMediaBuilder.photo(path));
+		await ctx.replyWithMediaGroup(media);
+		// await ctx.api.sendMediaGroup(ctx.chat?.id!, media);
 	}
 };

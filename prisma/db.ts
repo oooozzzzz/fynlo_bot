@@ -8,7 +8,7 @@ import {
 	ReplyKeyboardMarkup,
 	ReplyKeyboardRemove,
 } from "grammy/types";
-import { InlineKeyboard } from "grammy";
+import { InlineKeyboard, InputMediaBuilder } from "grammy";
 
 export const prisma = new PrismaClient();
 const questionsReminder = new ReminderSystem(
@@ -217,28 +217,58 @@ export const addPhotoToQuestion = async (
 };
 
 export const createInfoDB = async (data: Prisma.InfoBlockCreateInput) => {
-	console.log(data.order);
+	// try {
+	// 	await prisma.infoBlock.updateMany({
+	// 		where: {
+	// 			order: {
+	// 				gte: data.order,
+	// 			},
+	// 		},
+	// 		data: {
+	// 			order: {
+	// 				increment: 1,
+	// 			},
+	// 		},
+	// 	});
+
+	// 	// Вставляем новый элемент на нужную позицию
+
+	// 	const infoBlock = await prisma.infoBlock.create({ data });
+	// 	return infoBlock;
+	// } catch (error) {
+	// 	console.log(error);
+	// 	return false;
+	// }
 	try {
-		await prisma.infoBlock.updateMany({
-			where: {
-				order: {
-					gte: data.order,
-				},
-			},
-			data: {
-				order: {
-					increment: 1,
-				},
-			},
+		return await prisma.$transaction(async (prisma) => {
+			// Проверяем, существует ли элемент с таким же order
+			const existingBlock = await prisma.infoBlock.findUnique({
+				where: { order: data.order },
+			});
+
+			// Если позиция занята - делаем сдвиг
+			if (existingBlock) {
+				// Находим элементы для обновления (в обратном порядке)
+				const blocksToUpdate = await prisma.infoBlock.findMany({
+					where: { order: { gte: data.order } },
+					orderBy: { order: "desc" },
+				});
+
+				// Сдвигаем только если есть конфликт
+				for (const block of blocksToUpdate) {
+					await prisma.infoBlock.update({
+						where: { id: block.id },
+						data: { order: block.order + 1 },
+					});
+				}
+			}
+
+			// Создаем новый блок
+			return await prisma.infoBlock.create({ data });
 		});
-
-		// Вставляем новый элемент на нужную позицию
-
-		const infoBlock = await prisma.infoBlock.create({ data });
-		return infoBlock;
 	} catch (error) {
-		console.log(error);
-		return false;
+		console.error("Error creating InfoBlock:", error);
+		return null;
 	}
 };
 
@@ -332,24 +362,37 @@ async function sendInfoBlockToUser(
 	// Логика отправки (например, через email, API или WebSocket)
 	console.log(`Пользователь ${userId} получает инфоблок`);
 	const { photo, video, text } = infoBlock;
-	if (photo)
-		await api.sendPhoto(userId, photo, {
-			caption: text,
-			reply_markup: inlineKeyboard,
-			parse_mode: parse_mode ? parse_mode : undefined,
-		});
-	if (video)
-		await api.sendVideo(userId, video, {
-			caption: text,
-			reply_markup: inlineKeyboard,
-			parse_mode: parse_mode ? parse_mode : undefined,
-		});
-	if (!photo && !video)
-		await api.sendMessage(userId, infoBlock.text, {
-			reply_markup: inlineKeyboard,
-			parse_mode: parse_mode ? parse_mode : undefined,
-		});
-
+	const parsedPhoto = JSON.parse(photo!);
+	console.log(parsedPhoto);
+	if (parsedPhoto) {
+		const media = parsedPhoto.map((photoid: string) =>
+			InputMediaBuilder.photo(photoid),
+		);
+		try {
+			await api.sendMediaGroup(userId, media);
+			return;
+		} catch (error) {
+			console.error(error);
+		}
+	} else {
+		if (photo)
+			await api.sendPhoto(userId, photo, {
+				caption: text,
+				reply_markup: inlineKeyboard,
+				parse_mode: parse_mode ? parse_mode : undefined,
+			});
+		if (video)
+			await api.sendVideo(userId, video, {
+				caption: text,
+				reply_markup: inlineKeyboard,
+				parse_mode: parse_mode ? parse_mode : undefined,
+			});
+		if (!photo && !video)
+			await api.sendMessage(userId, infoBlock.text, {
+				reply_markup: inlineKeyboard,
+				parse_mode: parse_mode ? parse_mode : undefined,
+			});
+	}
 	// Пример: сохраняем в истории отправок
 	await prisma.infoBlockHistory.create({
 		data: {
@@ -670,4 +713,12 @@ export const getAllOrganizations = async () => {
 
 export const getAllUsers = async () => {
 	return await prisma.user.findMany({ include: { organization: true } });
+};
+
+export const deleteInfoBlockDB = async (order: number) => {
+	try {
+		return await prisma.infoBlock.delete({ where: { order } });
+	} catch (error) {
+		console.log(error);
+	}
 };

@@ -1,4 +1,4 @@
-import { Context } from "grammy";
+import { Context, InputMediaBuilder } from "grammy";
 import { toMainMenu } from "./routes/toMenus.js";
 import { Conversation } from "@grammyjs/conversations";
 import {
@@ -163,7 +163,20 @@ export const sendInfoBlock = async (
 		? (message = `Информационный блок номер ${infoBlock.order}\n\n${text}`)
 		: (message = text);
 	const photo = infoBlock.photo;
-	if (photo) {
+	const parsedPhoto = JSON.parse(photo!);
+	console.log(parsedPhoto);
+	if (parsedPhoto) {
+		const media = parsedPhoto.map((photoid: string) =>
+			InputMediaBuilder.photo(photoid),
+		);
+		try {
+			await api.sendMediaGroup(ctx.chat!.id.toString(), media);
+			return;
+		} catch (error) {
+			console.error(error);
+		}
+	}
+	if (photo && !parsedPhoto) {
 		await ctx.replyWithPhoto(photo, {
 			caption: message,
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,

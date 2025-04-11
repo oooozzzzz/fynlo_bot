@@ -21,11 +21,15 @@ import { createQuestion } from "./conversations/createQuestion.js";
 import { sendInfo, sendQuestions } from "./serviceFunctions.js";
 import { callbackQueryHandler } from "./handlers/callbackQueryHandler.js";
 import { updateQuestion } from "./conversations/updateQuestion.js";
-import { createInfo } from "./conversations/createInfo.js";
+import {
+	createInfo,
+	createMediaGroupInfo,
+} from "./conversations/createInfo.js";
 import { addQuestionConversation } from "./conversations/addQuestionToInfo.js";
 import {
 	clearInfoInUser,
 	createUser,
+	deleteInfoBlockDB,
 	deleteOrganizationDB,
 	deleteUser,
 	getPassword,
@@ -84,6 +88,7 @@ bot.use(
 	}),
 );
 bot.use(createConversation(introduce));
+bot.use(createConversation(createMediaGroupInfo));
 bot.use(createConversation(sendOutQuestion));
 bot.use(createConversation(askQuestion));
 bot.use(createConversation(answerQuestion));
@@ -171,6 +176,12 @@ bot.command("next_info", async (ctx) => {
 	// await sendNextQuestion(ctx.chat!.id);
 });
 
+bot.command("delete_info", async (ctx) => {
+	if (!ctx.match) return;
+	const res = await deleteInfoBlockDB(Number(ctx.match));
+	res ? await ctx.reply("Инфоблок удален") : await ctx.reply("Ошибка");
+});
+
 bot.callbackQuery("adminMenu", async (ctx) => {
 	try {
 		ctx.msg?.delete();
@@ -221,8 +232,6 @@ bot.command("add", async (ctx) => {
 });
 
 bot.on("message", async (ctx: MyContext) => {
-	console.log(ctx.message?.text, ctx.message?.entities);
-	console.log(ctx.entities());
 	if (ctx.session.isChatting) {
 		const response = await agent.ask(
 			ctx.message!.text!,
