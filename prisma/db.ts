@@ -361,14 +361,12 @@ async function sendInfoBlockToUser(
 ) {
 	// Логика отправки (например, через email, API или WebSocket)
 	console.log(`Пользователь ${userId} получает инфоблок`);
-	const { photo, video, text } = infoBlock;
-	try {
-	} catch (error) {}
-	if (photo) {
-		const parsedPhoto = JSON.parse(photo!);
-		if (parsedPhoto.length > 1) {
-			console.log(parsedPhoto);
-			const media = parsedPhoto.map((photoid: string) =>
+	const { video, text } = infoBlock;
+	const photo = JSON.parse(infoBlock.photo!);
+	if (photo[0] !== null) {
+		if (photo.length > 1) {
+			console.log(photo);
+			const media = photo.map((photoid: string) =>
 				InputMediaBuilder.photo(photoid),
 			);
 			try {
@@ -378,7 +376,7 @@ async function sendInfoBlockToUser(
 				console.error(error);
 			}
 		} else {
-			await api.sendPhoto(userId, parsedPhoto[0], {
+			await api.sendPhoto(userId, photo[0], {
 				caption: text,
 				reply_markup: inlineKeyboard,
 				parse_mode: parse_mode ? parse_mode : undefined,

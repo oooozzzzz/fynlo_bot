@@ -84,8 +84,8 @@ export const createInfo = async (
 	});
 	if (infoBlock) {
 		await ctx.reply("Информационный блок создан");
-		infoBlock.photo
-			? await ctx.replyWithPhoto(JSON.parse(infoBlock.photo)[0], {
+		JSON.parse(infoBlock.photo!)[0]
+			? await ctx.replyWithPhoto(JSON.parse(infoBlock.photo!)[0], {
 					caption: infoBlock.text,
 					reply_markup: infoBlockMenu(infoBlock),
 					parse_mode: "MarkdownV2",

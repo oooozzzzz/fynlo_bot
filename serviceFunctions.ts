@@ -162,11 +162,12 @@ export const sendInfoBlock = async (
 	addMenus
 		? (message = `Информационный блок номер ${infoBlock.order}\n\n${text}`)
 		: (message = text);
-	const photo = infoBlock.photo;
-	if (photo) {
-		const parsedPhoto = JSON.parse(photo!);
-		if (parsedPhoto.length > 1) {
-			const media = parsedPhoto.map((photoid: string) =>
+	const photo = JSON.parse(infoBlock.photo!);
+	console.log(photo);
+	if (photo[0] !== null) {
+		// const parsedPhoto = JSON.parse(photo!);
+		if (photo.length > 1) {
+			const media = photo.map((photoid: string) =>
 				InputMediaBuilder.photo(photoid),
 			);
 			try {
@@ -176,7 +177,7 @@ export const sendInfoBlock = async (
 				console.error(error);
 			}
 		} else {
-			await ctx.replyWithPhoto(parsedPhoto[0], {
+			await ctx.replyWithPhoto(photo[0], {
 				caption: message,
 				reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
 				parse_mode: parse_mode ? parse_mode : undefined,
