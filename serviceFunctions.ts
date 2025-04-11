@@ -423,7 +423,7 @@ export interface FormattedText {
 function escapeMarkdown(text: string): string {
 	const specialChars = [
 		"_",
-		"*",
+		// "*",
 		"[",
 		"]",
 		"(",
@@ -433,7 +433,7 @@ function escapeMarkdown(text: string): string {
 		">",
 		"#",
 		"+",
-		"-",
+		// "-",
 		"=",
 		"|",
 		"{",
@@ -461,7 +461,7 @@ export function applyMarkdownV2({ text, entities }: FormattedText): string {
 	// Сортируем сущности в обратном порядке (для корректной вставки)
 	const sortedEntities = [...entities].sort((a, b) => b.offset - a.offset);
 
-	let result = escapedText;
+	let result = text;
 	for (const entity of sortedEntities) {
 		const { offset, length, type } = entity;
 		const start = offset;
@@ -492,5 +492,5 @@ export function applyMarkdownV2({ text, entities }: FormattedText): string {
 		result = result.substring(0, start) + formattedText + result.substring(end);
 	}
 
-	return result;
+	return escapeMarkdown(result);
 }

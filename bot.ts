@@ -18,7 +18,11 @@ import {
 import { introduce } from "./conversations/introduce.js";
 import { create } from "domain";
 import { createQuestion } from "./conversations/createQuestion.js";
-import { sendInfo, sendQuestions } from "./serviceFunctions.js";
+import {
+	applyMarkdownV2,
+	sendInfo,
+	sendQuestions,
+} from "./serviceFunctions.js";
 import { callbackQueryHandler } from "./handlers/callbackQueryHandler.js";
 import { updateQuestion } from "./conversations/updateQuestion.js";
 import {
@@ -237,6 +241,14 @@ bot.command("add", async (ctx) => {
 });
 
 bot.on("message", async (ctx: MyContext) => {
+	console.log(ctx.message);
+	ctx.reply(
+		applyMarkdownV2({
+			text: ctx.message!.text!,
+			entities: ctx.message!.entities!,
+		}),
+		{ parse_mode: "MarkdownV2" },
+	);
 	if (ctx.session.isChatting) {
 		const response = await agent.ask(
 			ctx.message!.text!,
