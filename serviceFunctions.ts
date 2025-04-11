@@ -163,25 +163,25 @@ export const sendInfoBlock = async (
 		? (message = `Информационный блок номер ${infoBlock.order}\n\n${text}`)
 		: (message = text);
 	const photo = infoBlock.photo;
-	const parsedPhoto = JSON.parse(photo!);
-	if (parsedPhoto.length > 1) {
-		console.log(parsedPhoto);
-		const media = parsedPhoto.map((photoid: string) =>
-			InputMediaBuilder.photo(photoid),
-		);
-		try {
-			await api.sendMediaGroup(ctx.chat!.id.toString(), media);
-			return;
-		} catch (error) {
-			console.error(error);
+	if (photo) {
+		const parsedPhoto = JSON.parse(photo!);
+		if (parsedPhoto.length > 1) {
+			const media = parsedPhoto.map((photoid: string) =>
+				InputMediaBuilder.photo(photoid),
+			);
+			try {
+				await api.sendMediaGroup(ctx.chat!.id.toString(), media);
+				return;
+			} catch (error) {
+				console.error(error);
+			}
+		} else {
+			await ctx.replyWithPhoto(parsedPhoto[0], {
+				caption: message,
+				reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
+				parse_mode: parse_mode ? parse_mode : undefined,
+			});
 		}
-	}
-	if (parsedPhoto.length === 1) {
-		await ctx.replyWithPhoto(parsedPhoto[0], {
-			caption: message,
-			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
-			parse_mode: parse_mode ? parse_mode : undefined,
-		});
 	} else if (infoBlock.video) {
 		await ctx.replyWithVideo(infoBlock.video, {
 			caption: message,
