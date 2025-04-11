@@ -364,37 +364,39 @@ async function sendInfoBlockToUser(
 	const { photo, video, text } = infoBlock;
 	try {
 	} catch (error) {}
-	const parsedPhoto = JSON.parse(photo!);
-	if (parsedPhoto.length > 1) {
-		console.log(parsedPhoto);
-		const media = parsedPhoto.map((photoid: string) =>
-			InputMediaBuilder.photo(photoid),
-		);
-		try {
-			await api.sendMediaGroup(userId, media);
-			return;
-		} catch (error) {
-			console.error(error);
+	if (photo) {
+		const parsedPhoto = JSON.parse(photo!);
+		if (parsedPhoto.length > 1) {
+			console.log(parsedPhoto);
+			const media = parsedPhoto.map((photoid: string) =>
+				InputMediaBuilder.photo(photoid),
+			);
+			try {
+				await api.sendMediaGroup(userId, media);
+				return;
+			} catch (error) {
+				console.error(error);
+			}
+		} else {
+			await api.sendPhoto(userId, parsedPhoto[0], {
+				caption: text,
+				reply_markup: inlineKeyboard,
+				parse_mode: parse_mode ? parse_mode : undefined,
+			});
 		}
-	} else {
-		if (photo)
-			await api.sendPhoto(userId, JSON.parse(photo)[0], {
-				caption: text,
-				reply_markup: inlineKeyboard,
-				parse_mode: parse_mode ? parse_mode : undefined,
-			});
-		if (video)
-			await api.sendVideo(userId, video, {
-				caption: text,
-				reply_markup: inlineKeyboard,
-				parse_mode: parse_mode ? parse_mode : undefined,
-			});
-		if (!photo && !video)
-			await api.sendMessage(userId, infoBlock.text, {
-				reply_markup: inlineKeyboard,
-				parse_mode: parse_mode ? parse_mode : undefined,
-			});
 	}
+	if (video)
+		await api.sendVideo(userId, video, {
+			caption: text,
+			reply_markup: inlineKeyboard,
+			parse_mode: parse_mode ? parse_mode : undefined,
+		});
+	if (!photo && !video)
+		await api.sendMessage(userId, infoBlock.text, {
+			reply_markup: inlineKeyboard,
+			parse_mode: parse_mode ? parse_mode : undefined,
+		});
+
 	// Пример: сохраняем в истории отправок
 	await prisma.infoBlockHistory.create({
 		data: {
@@ -453,7 +455,6 @@ export async function sendNextInfoBlock(
 		where: { order: user.currentInfoBlockOrder },
 		include: { questions: true },
 	});
-	console.log(infoBlock);
 
 	if (!infoBlock) {
 		await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
