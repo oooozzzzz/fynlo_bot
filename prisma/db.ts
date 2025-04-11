@@ -389,7 +389,7 @@ async function sendInfoBlockToUser(
 			reply_markup: inlineKeyboard,
 			parse_mode: parse_mode ? parse_mode : undefined,
 		});
-	if (!photo && !video)
+	if (!photo[0] && !video)
 		await api.sendMessage(userId, infoBlock.text, {
 			reply_markup: inlineKeyboard,
 			parse_mode: parse_mode ? parse_mode : undefined,
@@ -433,7 +433,7 @@ export const sendInfoBlocks = async (userId: string) => {
 		} else {
 			break;
 		}
-		await delay(15000);
+		await delay(5000);
 	}
 	return result;
 };
