@@ -79,13 +79,13 @@ export const createInfo = async (
 	const infoBlock = await createInfoDB({
 		text: applyMarkdownV2({ text, entities }),
 		order,
-		photo: photoId,
+		photo: JSON.stringify([photoId]),
 		video: videoId,
 	});
 	if (infoBlock) {
 		await ctx.reply("Информационный блок создан");
 		infoBlock.photo
-			? await ctx.replyWithPhoto(infoBlock.photo, {
+			? await ctx.replyWithPhoto(JSON.parse(infoBlock.photo)[0], {
 					caption: infoBlock.text,
 					reply_markup: infoBlockMenu(infoBlock),
 					parse_mode: "MarkdownV2",

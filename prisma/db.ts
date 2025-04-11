@@ -362,9 +362,11 @@ async function sendInfoBlockToUser(
 	// Логика отправки (например, через email, API или WebSocket)
 	console.log(`Пользователь ${userId} получает инфоблок`);
 	const { photo, video, text } = infoBlock;
+	try {
+	} catch (error) {}
 	const parsedPhoto = JSON.parse(photo!);
-	console.log(parsedPhoto);
-	if (parsedPhoto) {
+	if (parsedPhoto.length > 1) {
+		console.log(parsedPhoto);
 		const media = parsedPhoto.map((photoid: string) =>
 			InputMediaBuilder.photo(photoid),
 		);
@@ -376,7 +378,7 @@ async function sendInfoBlockToUser(
 		}
 	} else {
 		if (photo)
-			await api.sendPhoto(userId, photo, {
+			await api.sendPhoto(userId, JSON.parse(photo)[0], {
 				caption: text,
 				reply_markup: inlineKeyboard,
 				parse_mode: parse_mode ? parse_mode : undefined,
@@ -422,12 +424,12 @@ export const sendInfoBlocks = async (userId: string) => {
 		}
 		const questions = infoBlock?.questions;
 		await sendNextInfoBlock(userId);
+		result = true;
 		if (questions.length == 0) {
 			await prisma.user.update({
 				where: { id: userId },
 				data: { currentInfoBlockOrder: { increment: 1 } },
 			});
-			result = true;
 		} else {
 			break;
 		}

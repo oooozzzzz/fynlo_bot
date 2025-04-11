@@ -22,6 +22,7 @@ export const startMenu = new Menu<MyContext>("startMenu")
 		}
 		// const res = await sendNextInfoBlock(ctx.msg?.chat?.id.toString()!);
 		const res = await sendInfoBlocks(ctx.msg?.chat?.id.toString()!);
+		console.log(res);
 		if (!res) {
 			await ctx.reply(
 				"На сегодня весь блок информации изучен, до встречи завтра!",

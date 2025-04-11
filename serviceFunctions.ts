@@ -164,8 +164,8 @@ export const sendInfoBlock = async (
 		: (message = text);
 	const photo = infoBlock.photo;
 	const parsedPhoto = JSON.parse(photo!);
-	console.log(parsedPhoto);
-	if (parsedPhoto) {
+	if (parsedPhoto.length > 1) {
+		console.log(parsedPhoto);
 		const media = parsedPhoto.map((photoid: string) =>
 			InputMediaBuilder.photo(photoid),
 		);
@@ -176,8 +176,8 @@ export const sendInfoBlock = async (
 			console.error(error);
 		}
 	}
-	if (photo && !parsedPhoto) {
-		await ctx.replyWithPhoto(photo, {
+	if (parsedPhoto.length === 1) {
+		await ctx.replyWithPhoto(parsedPhoto[0], {
 			caption: message,
 			reply_markup: addMenus ? infoBlockMenu(infoBlock) : undefined,
 			parse_mode: parse_mode ? parse_mode : undefined,
