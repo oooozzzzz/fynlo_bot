@@ -7,7 +7,6 @@ import {
 } from "./prisma/db.js";
 import { InlineKeyboard } from "grammy";
 import { delay } from "./serviceFunctions.js";
-import "source-map-support/register";
 async function main() {
 	bot.catch((err: Error) => {
 		console.log("Error while handling update", err);
