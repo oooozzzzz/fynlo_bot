@@ -422,7 +422,7 @@ export interface FormattedText {
 // Экранирует спецсимволы Markdown V2
 function escapeMarkdown(text: string): string {
 	const specialChars = [
-		"_",
+		// "_",
 		// "*",
 		"[",
 		"]",
@@ -433,7 +433,7 @@ function escapeMarkdown(text: string): string {
 		">",
 		"#",
 		"+",
-		// "-",
+		"-",
 		"=",
 		"|",
 		"{",
