@@ -535,7 +535,6 @@ export async function sendNextQuestion(userId: string) {
 		// Если текущий вопрос не задан, начинаем с первого
 		currentQuestion = infoBlock.questions[0];
 	}
-	console.log(currentQuestion);
 
 	if (!currentQuestion) {
 		// Если вопросы закончились, переходим к следующему инфоблоку
@@ -550,7 +549,7 @@ export async function sendNextQuestion(userId: string) {
 				currentQuestionId: null, // Сбрасываем текущий вопрос
 			},
 		});
-		await sendNextInfoBlock(userId);
+		await sendInfoBlocks(userId);
 		return;
 	}
 
@@ -595,7 +594,6 @@ export async function handleAnswerDB(
 	if (answer.question.InfoBlock?.order !== user.currentInfoBlockOrder) {
 		return;
 	}
-	console.log("in4");
 
 	// Шаг 2: Обновляем данные пользователя
 	const updatedUser = await prisma.user.update({
