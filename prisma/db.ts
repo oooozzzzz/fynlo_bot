@@ -11,7 +11,7 @@ import {
 import { InlineKeyboard, InputMediaBuilder } from "grammy";
 
 export const prisma = new PrismaClient();
-const questionsReminder = new ReminderSystem(
+export const questionsReminder = new ReminderSystem(
 	"У вас остались незаконченные вопросы. Ответьте на них, чтобы продолжить обучение.",
 );
 
@@ -365,7 +365,6 @@ async function sendInfoBlockToUser(
 	const photo = JSON.parse(infoBlock.photo!);
 	if (photo[0] !== null) {
 		if (photo.length > 1) {
-			console.log(photo);
 			const media = photo.map((photoid: string) =>
 				InputMediaBuilder.photo(photoid),
 			);
@@ -420,6 +419,7 @@ export const sendInfoBlocks = async (userId: string) => {
 		});
 		console.log(infoBlock);
 		if (!infoBlock) {
+			await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
 			break;
 		}
 		const questions = infoBlock?.questions;
@@ -428,7 +428,9 @@ export const sendInfoBlocks = async (userId: string) => {
 		if (questions.length == 0) {
 			await prisma.user.update({
 				where: { id: userId },
-				data: { currentInfoBlockOrder: { increment: 1 } },
+				data: {
+					currentInfoBlockOrder: { increment: 1 },
+				},
 			});
 		} else {
 			break;
@@ -455,7 +457,7 @@ export async function sendNextInfoBlock(
 	});
 
 	if (!infoBlock) {
-		await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
+		// await api.sendMessage(userId, "Поздравляем! Вы завершили обучение.");
 		console.log(`Пользователь ${userId} завершил все инфоблоки.`);
 		return false;
 	}
@@ -546,6 +548,7 @@ export async function sendNextQuestion(userId: string) {
 			where: { id: userId },
 			data: {
 				currentInfoBlockOrder: { increment: 1 },
+				stage: { set: 0 },
 				currentQuestionId: null, // Сбрасываем текущий вопрос
 			},
 		});
@@ -717,6 +720,14 @@ export const getAllUsers = async () => {
 export const deleteInfoBlockDB = async (order: number) => {
 	try {
 		return await prisma.infoBlock.delete({ where: { order } });
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+export const setStage = async (id: string, stage: number) => {
+	try {
+		return await prisma.user.update({ where: { id }, data: { stage } });
 	} catch (error) {
 		console.log(error);
 	}

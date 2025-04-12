@@ -40,6 +40,7 @@ import {
 	getUser,
 	sendNextInfoBlock,
 	sendNextQuestion,
+	setStage,
 } from "./prisma/db.js";
 import { createOrganization } from "./conversations/createOrganization.js";
 import { createUserConversation } from "./conversations/createUser.js";
@@ -58,6 +59,7 @@ import {
 	askQuestion,
 } from "./conversations/askConversation.js";
 import { sendOutQuestion } from "./conversations/sendOutQuestion.js";
+import { set } from "zod";
 
 interface SessionData {
 	isChatting: boolean;
@@ -204,6 +206,7 @@ bot.callbackQuery("handleInfoBlock", async (ctx) => {
 	await ctx.reply(
 		"Отлично! Встретимся завтра, чтобы проверить полученные знания.",
 	);
+	await setStage(ctx.chat!.id.toString(), 1);
 	if (process.env.NODE_ENV !== "prod") {
 		await ctx.reply(
 			"Для удобства тестирования сейчас направляется следующий вопрос, но в продакшене тут будет отправляться текст с прощанием до завтра",
@@ -213,8 +216,8 @@ bot.callbackQuery("handleInfoBlock", async (ctx) => {
 });
 bot.callbackQuery("nextQuestion", async (ctx) => {
 	console.log(ctx.update.callback_query);
-	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Да!", "!"));
-
+	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Я справлюсь!", "!"));
+	await setStage(ctx.chat!.id.toString(), 2);
 	await sendNextQuestion(ctx.chat!.id.toString());
 });
 

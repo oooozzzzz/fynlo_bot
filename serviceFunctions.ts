@@ -211,7 +211,7 @@ export const sendInfo = async (ctx: Context) => {
 
 	for (const infoBlock of infoBlocks) {
 		await sendInfoBlock(infoBlock, ctx, true);
-		await delay(300);
+		await delay(400);
 	}
 };
 
