@@ -14,7 +14,7 @@ model User {
   phoneNumber             String?            @map("phone_number")
   position                String?
   nickname                String?
-  stage                   Int                @default(1)
+  stage                   Int                @default(2)
   questions               Question[]
   answers                 Answer[]
   infoBlocks              InfoBlock[]

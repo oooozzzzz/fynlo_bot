@@ -435,6 +435,9 @@ export const sendInfoBlocks = async (userId: string) => {
 		} else {
 			break;
 		}
+		if (user.currentInfoBlockOrder == 1) {
+			await delay(3600000);
+		}
 		await delay(5000);
 	}
 	return result;
