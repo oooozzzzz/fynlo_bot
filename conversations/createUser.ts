@@ -6,6 +6,7 @@ import {
 	createUser,
 	getOrganizationDB,
 	organizationExists,
+	sendInfoBlocks,
 	sendNextInfoBlock,
 } from "../prisma/db.js";
 import { MyConversation, MyConversationContext } from "../bot.js";
@@ -84,9 +85,6 @@ export const createUserConversation = async (
 			"Супер, спасибо! В течение 14 дней будем направлять вам информацию. \n\nА сейчас - первый вводный блок",
 		);
 		await delay(3500);
-		sendNextInfoBlock(
-			user.id,
-			new InlineKeyboard().text("Я все понял(а)!", "nextQuestion"),
-		);
+		sendInfoBlocks(user.id);
 	}
 };
