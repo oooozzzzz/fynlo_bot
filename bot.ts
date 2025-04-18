@@ -150,7 +150,14 @@ bot.command("start", async (ctx: MyContext) => {
 		await ctx.reply("Диалог завершен");
 		await agent.clearMessageHistory(ctx.chat!.id.toString());
 	}
-	await ctx.reply("Стартовый текст", { reply_markup: startMenu });
+	await ctx.reply(
+		`Привет!
+Добро пожаловать в обучающий бот бренда FYNLO — это больше, чем просто коллаген.
+
+Нажми «Приступить к обучению», чтобы узнать всё самое важное о продукте,
+или выбери «Базу знаний», если хочешь быстро найти ответ на конкретный вопрос.`,
+		{ reply_markup: startMenu },
+	);
 });
 bot.command("id", async (ctx) => {
 	await ctx.reply(ctx.chat!.id.toString());

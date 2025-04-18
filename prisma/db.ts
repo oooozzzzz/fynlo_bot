@@ -435,7 +435,7 @@ export const sendInfoBlocks = async (userId: string) => {
 		} else {
 			break;
 		}
-		if (user.currentInfoBlockOrder == 1) {
+		if (infoBlock.video) {
 			await delay(3600000);
 		}
 		await delay(5000);
@@ -631,13 +631,19 @@ export async function handleAnswerDB(
 				await api.sendMessage(
 					userId,
 					// тексто после двух неправильных ответов подярд
-					"Вы дважды неправильно ответили на вопрос. Направляем Вам информационный блок повторно.",
+					"Вы дважды неправильно ответили на вопрос. Пожалуйста, ознакомьтесь с инфоблоком повторно и попробуйте еще раз. 👆",
+					{
+						reply_markup: new InlineKeyboard().text(
+							"Попробовать еще раз",
+							"nextQuestion",
+						),
+					},
 				);
-				await sendInfoBlockToUser(
-					userId,
-					infoBlock,
-					new InlineKeyboard().text("Попробовать еще раз", "nextQuestion"),
-				);
+				// await sendInfoBlockToUser(
+				// 	userId,
+				// 	infoBlock,
+				// 	new InlineKeyboard().text("Попробовать еще раз", "nextQuestion"),
+				// );
 
 				// Шаг 6: Обновляем счетчики
 				await prisma.user.update({
