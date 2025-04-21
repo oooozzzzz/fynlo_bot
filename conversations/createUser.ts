@@ -77,6 +77,7 @@ export const createUserConversation = async (
 		id: ctx.from!.id.toString(),
 		phoneNumber: contact.phone_number!,
 		firstName: name,
+		nickname: ctx.from?.username,
 		organization: { connect: { id: Number(organizationId.message!.text!) } },
 		position,
 	});
