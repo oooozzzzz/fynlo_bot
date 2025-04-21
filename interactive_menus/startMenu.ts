@@ -13,6 +13,12 @@ export const startMenu = new Menu<MyContext>("startMenu")
 		);
 		ctx.session.isChatting = true;
 	})
+	// .row()
+	// .text("Связаться с командой Fynlo", async (ctx) => {
+	// 	await ctx.conversation.enter("askQuestion");
+	// 	console.log(ctx.conversation);
+	// 	// console.log("hello");
+	// })
 	.row()
 	.text("Приступить к обучению", async (ctx) => {
 		if (await hasFinishedInfoBlocks(ctx.msg?.chat?.id.toString()!)) {

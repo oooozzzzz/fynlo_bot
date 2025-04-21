@@ -26,7 +26,7 @@ async function main() {
 					questionsReminder.sendMessage(user.id);
 					await api.sendMessage(
 						user.id,
-						"Добрый день! Пришло время проверить полученные знания. Приступим?",
+						`${user.firstName}, добрый день! Пришло время проверить полученные знания. Приступим?`,
 						{ reply_markup: new InlineKeyboard().text("Да!", "nextQuestion") },
 					);
 					await setStage(user.id, 2);

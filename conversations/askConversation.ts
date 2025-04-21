@@ -25,9 +25,11 @@ export const answerQuestion = async (
 		answerCtx.msg?.delete();
 		return ctx.reply("Операция отменена");
 	}
-	await ctx.api.deleteMessage(beginning.chat.id, beginning.message_id);
-	await ctx.api.sendMessage(userId, `Ответ от администратора:\n\n${answer}`);
-	await ctx.reply("Ваш ответ передан пользователю!");
+	try {
+		await ctx.api.deleteMessage(beginning.chat.id, beginning.message_id);
+		await ctx.api.sendMessage(userId, `Ответ от администратора:\n\n${answer}`);
+		await ctx.reply("Ваш ответ передан пользователю!");
+	} catch (error) {}
 };
 
 export const askQuestion = async (

@@ -545,7 +545,7 @@ export async function sendNextQuestion(userId: string) {
 		// Если вопросы закончились, переходим к следующему инфоблоку
 		await api.sendMessage(
 			userId,
-			"Отлично, так держать! Теперь переходим к новому блоку информации",
+			`Отлично, так держать! Теперь переходим к новому блоку информации`,
 		);
 		await prisma.user.update({
 			where: { id: userId },

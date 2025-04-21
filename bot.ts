@@ -135,6 +135,14 @@ if (process.env.NODE_ENV == "dev") {
 			command: "start",
 			description: "Начать работу с ботом",
 		},
+		{
+			command: "help",
+			description: "Получить инструкцию по использованию бота",
+		},
+		{
+			command: "feedback",
+			description: "Связаться с командой Fynlo",
+		},
 	]);
 }
 
@@ -158,6 +166,10 @@ bot.command("start", async (ctx: MyContext) => {
 или выбери «Базу знаний», если хочешь быстро найти ответ на конкретный вопрос.`,
 		{ reply_markup: startMenu },
 	);
+});
+
+bot.command("feedback", async (ctx) => {
+	await ctx.conversation.enter("askQuestion");
 });
 bot.command("id", async (ctx) => {
 	await ctx.reply(ctx.chat!.id.toString());
@@ -209,9 +221,10 @@ bot.callbackQuery("adminMenu", async (ctx) => {
 	await ctx.reply("Панель администратора", { reply_markup: adminMenu });
 });
 bot.callbackQuery("handleInfoBlock", async (ctx) => {
+	const user = await getUser(ctx.chat!.id.toString());
 	ctx.msg?.editReplyMarkup(new InlineKeyboard().text("Я все понял(а)!", "!"));
 	await ctx.reply(
-		"Отлично! Встретимся завтра, чтобы проверить полученные знания.",
+		`${user?.firstName}, отлично! Встретимся завтра, чтобы проверить полученные знания.`,
 	);
 	await setStage(ctx.chat!.id.toString(), 1);
 	if (process.env.NODE_ENV !== "prod") {

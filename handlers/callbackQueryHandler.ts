@@ -4,6 +4,7 @@ import { handleAnswer } from "./handleAsnwer.js";
 import { updateQuestion } from "../conversations/updateQuestion.js";
 import { MyContext } from "../bot.js";
 import { sendQuestions } from "../serviceFunctions.js";
+import { toMainMenu } from "../routes/toMenus.js";
 
 export const callbackQueryHandler = async (ctx: MyContext) => {
 	const query = ctx.callbackQuery?.data!;
@@ -46,6 +47,9 @@ export const callbackQueryHandler = async (ctx: MyContext) => {
 			break;
 		case "question":
 			await ctx.conversation.enter("answerQuestion", parseInt(data[1]));
+			break;
+		case "mainMenu":
+			await toMainMenu(ctx);
 			break;
 		default:
 			break;
