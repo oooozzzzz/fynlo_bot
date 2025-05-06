@@ -188,7 +188,11 @@ bot.command("next_question", async (ctx) => {
 	await sendNextQuestion(ctx.chat!.id.toString());
 });
 bot.command("delete", async (ctx) => {
-	const result = await deleteUser(ctx.from!.id.toString());
+	let userId = ctx.match;
+	if (!userId) {
+		userId = ctx.from!.id.toString();
+	}
+	const result = await deleteUser(userId);
 	if (result) {
 		await ctx.reply("Пользователь удален");
 	} else {
